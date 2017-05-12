@@ -16,7 +16,7 @@
 #
 # HistPlat.py - wrap system-specific functions
 
-import importlib, os
+import importlib, os, HistLib
 
 if HistLib.FindModule("xdg"):
 	BaseDirectory = importlib.import_module("xdg.BaseDirectory")

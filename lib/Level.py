@@ -14,27 +14,26 @@
 # You should have received a copy of the GNU General Public License
 # along with Histacom.AU.  If not, see <http://www.gnu.org/licenses/>.
 #
-# String.py - serialisable classes for the two binary string types
+# Level.py - class for storing level metadata
 
-import HistLib
+import HistLib, String, WManager
 
-class CString(HistLib.Format):
+class Level(HistLib.Format):
 	def _LoadF(self, fobj):
-		self.pystr = HistLib.ReadCString(fobj)
+		if fobj.read(4) != "HILL":
+			raise HistLib.WrongFiletypeException("This is not a Histacom.AU level")
+		self.year = HistLib.shortstruct.unpack(fobj.read(2))[0] # year 32769 bug!
+		self.wm = eval(HistLib.ReadOString(fobj))()
+		for x in range(0, HistLib.shortstruct.unpack(fobj.read(2))[0]):
+			self.deps.append(HistLib.ReadOString(fobj))
 	def _SaveF(self, fobj):
-		HistLib.WriteCString(fobj, self.pystr)
+		fobj.write("HILL")
+		fobj.write(HistLib.shortstruct.pack(self.year))
+		fobj.write(HistLib.shortstruct.pack(len(self.deps)))
+		HistLib.WriteOString(fobj, str(self.wm.__class__))
+		for dep in self.deps:
+			HistLib.WriteOString(fobj, dep)
 	def _New(self):
-		self.pystr = ""
-	def Load(self, argument):
-		if isinstance(argument, str):
-			self.pystr = argument
-		elif isinstance(argument, file):
-			return self._LoadF(argument)
-		else:
-			raise InvalidArgumentException
-
-class OString(CString):
-	def _LoadF(self, fobj):
-		self.pystr = HistLib.ReadOString(fobj)
-	def _SaveF(self, fobj):
-		HistLib.WriteOString(fobj, self.pystr)
+		self.year = 0
+		self.deps = []
+		self.wm = None

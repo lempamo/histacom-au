@@ -41,33 +41,41 @@ def ReadCString(myFile):
 			return myString
 		myString += byte
 
+# Write a C string to a file.
+def WriteCString(myFile, myString):
+	myFile.write(myString + "\0")
+
 # Read an "O String" from a file (1-byte length int followed by data).
 def ReadOString(myFile):
 	return myFile.read(ord(myFile.read(1)))
+
+# Write an "O String" to a file.
+def WriteOString(myFile, myString):
+	myFile.write(chr(len(myString)) + myString)
 
 # Generic class for a file format. Derived classes should define:
 # _LoadF(self, fileobj) _SaveF(self, fileobj) _New(self)
 class Format:
 	def _LoadStr(self, filename):
-		myFile = open(filename, "rb")
-		return self._LoadF(myFile)
+		with open(filename, "rb") as myFile:
+			return self._LoadF(myFile)
 	
 	def Load(self, argument):
-		if argument.__class__ == str:
+		if isinstance(argument, str):
 			return self._LoadStr(argument)
-		elif argument.__class__ == file:
+		elif isinstance(argument, file):
 			return self._LoadF(argument)
 		else:
 			raise InvalidArgumentException
 	
 	def _SaveStr(self, filename):
-		myFile = open(filename, "wb")
-		return self._SaveF(myFile)
+		with open(filename, "wb") as myFile:
+			return self._SaveF(myFile)
 	
 	def Save(self, argument):
-		if argument.__class__ == str:
+		if isinstance(argument, str):
 			return self._SaveStr(argument)
-		elif argument.__class__ == file:
+		elif isinstance(argument, file):
 			return self._SaveF(argument)
 		else:
 			raise InvalidArgumentException
@@ -84,4 +92,6 @@ try:
 except:
 	pass
 
+# Store two- and four-byte unsigned integers in binary files.
 longstruct = struct.Struct("<L")
+shortstruct = struct.Struct("<H")

@@ -14,27 +14,15 @@
 # You should have received a copy of the GNU General Public License
 # along with Histacom.AU.  If not, see <http://www.gnu.org/licenses/>.
 #
-# String.py - serialisable classes for the two binary string types
+# HStruct.py - replicates the functionality of a C Struct in Python
+# Not to be confused with the inbuilt module "struct"
 
-import HistLib
-
-class CString(HistLib.Format):
-	def _LoadF(self, fobj):
-		self.pystr = HistLib.ReadCString(fobj)
-	def _SaveF(self, fobj):
-		HistLib.WriteCString(fobj, self.pystr)
-	def _New(self):
-		self.pystr = ""
-	def Load(self, argument):
-		if isinstance(argument, str):
-			self.pystr = argument
-		elif isinstance(argument, file):
-			return self._LoadF(argument)
-		else:
-			raise InvalidArgumentException
-
-class OString(CString):
-	def _LoadF(self, fobj):
-		self.pystr = HistLib.ReadOString(fobj)
-	def _SaveF(self, fobj):
-		HistLib.WriteOString(fobj, self.pystr)
+# Returns a class definition. Usage:
+# exec(HStruct.Gen("Window", "w", "h", "x", "y"))
+def Gen(clsname, *args):
+	return ("""
+class {0}:
+	def __init__(self, {1}):
+""".format(clsname,
+	", ".join(args)) +
+	"".join(["\t\tself.{0} = {0}\n".format(x) for x in args]))

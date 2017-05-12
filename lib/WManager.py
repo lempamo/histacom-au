@@ -14,27 +14,22 @@
 # You should have received a copy of the GNU General Public License
 # along with Histacom.AU.  If not, see <http://www.gnu.org/licenses/>.
 #
-# String.py - serialisable classes for the two binary string types
+# WManager.py - Window manager implementations
 
-import HistLib
+import Engine, HStruct
 
-class CString(HistLib.Format):
-	def _LoadF(self, fobj):
-		self.pystr = HistLib.ReadCString(fobj)
-	def _SaveF(self, fobj):
-		HistLib.WriteCString(fobj, self.pystr)
-	def _New(self):
-		self.pystr = ""
-	def Load(self, argument):
-		if isinstance(argument, str):
-			self.pystr = argument
-		elif isinstance(argument, file):
-			return self._LoadF(argument)
+# Window struct
+exec(HStruct.Gen("Window", "w", "h", "x", "y"))	
+
+# Change mode to window size and stick in (0, 0). So, don't do much.
+# Used for the launcher. Bad idea to try multiple windows on it.
+class Shim:
+	def __init__(self):
+		self.windows = []
+	
+	def createWindow(self, w, h, x = -1, y = -1):
+		if len(self.freedWindowSlots) > 0:
+			entityId = min(freedWindowSlots)
+			freedEntitySlots.remove(entityId)
 		else:
-			raise InvalidArgumentException
-
-class OString(CString):
-	def _LoadF(self, fobj):
-		self.pystr = HistLib.ReadOString(fobj)
-	def _SaveF(self, fobj):
-		HistLib.WriteOString(fobj, self.pystr)
+			entityId = len(entities)

@@ -51,19 +51,15 @@ def alertTkinter(message):
 def alertWin32(message):
 	win32api.MessageBox(0, message, productName)
 
-def alertPrint(message):
-	# Ok, ok, Python 3 had the right idea on this one.
-	print(message)
-
 def alert(message):
 	# Find the best way to get information to the user, then use it.
 	global alertmethod, gtk, MESSAGE_ERROR, BUTTONS_OK, Tkinter, tkMessageBox, win32api
 	if alertmethod == None:
 		if FindModule("win32api"):
-			win32api = __import__("win32api")
+			win32api = importlib.import_module("win32api")
 			alertmethod = alertWin32
 		elif FindModule("gtk"):
-			gtk = __import__("gtk")
+			gtk = importlib.import_module("gtk")
 			MESSAGE_ERROR = gtk.MESSAGE_ERROR
 			BUTTONS_OK = gtk.BUTTONS_OK
 			alertmethod = alertGtk
@@ -72,16 +68,17 @@ def alert(message):
 			MESSAGE_ERROR = gtk.MessageType.ERROR
 			BUTTONS_OK = gtk.ButtonsType.OK
 			alertmethod = alertGtk
-		elif FindModule("tkMessageBox"):
-			Tkinter = __import__("Tkinter")
-			tkMessageBox = __import__("tkMessageBox")
-			alertmethod = alertTkinter
-		elif FindModule("tkinter"):
-			Tkinter = __import__("tkinter")
-			tkMessageBox = importlib.import_module("tkinter.messagebox")
-			alertmethod = alertTkinter
+		elif FindModule("_tkinter"):
+			if FindModule("tkMessageBox"):
+				Tkinter = importlib.import_module("Tkinter")
+				tkMessageBox = importlib.import_module("tkMessageBox")
+				alertmethod = alertTkinter
+			else:
+				Tkinter = importlib.import_module("tkinter")
+				tkMessageBox = importlib.import_module("tkinter.messagebox")
+				alertmethod = alertTkinter
 		else:
-			alertmethod = alertPrint
+			alertmethod = getattr(__builtins__, "print")
 	alertmethod(message)
 
 def exception(exctype, value, trace):
@@ -91,7 +88,7 @@ def exception(exctype, value, trace):
 
 sys.excepthook = exception
 
-sys.path.append("lib")
+sys.path.insert(0, "lib")
 
 import distutils.spawn
 
@@ -118,6 +115,21 @@ if sys.version_info[0] != 2:
 					command = python
 					break
 	
+	# Registry entry (untested)
+	if not command:
+		if FindModule("winreg"):
+			winreg = importlib.import_module("winreg")
+			PythonCore = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Python\PythonCore")
+			for i in range(0, winreg.QueryInfoKey(PythonCore)[0]):
+				try:
+					keyname = winreg.EnumKey(PythonCore, i)
+					if keyname[0] == "2":
+						verkey = winreg.OpenKey(PythonCore, keyname)
+						command = winreg.QueryValue(verkey, "InstallPath")
+						break
+				except WindowsError:
+					continue
+			
 	# Give up
 	if not command:
 		alert(productName + " requires Python 2 to run.")
@@ -140,14 +152,23 @@ for fn in files:
 	if fn.endswith(".py"):
 		# Open the source file and split it into lines for iteration.
 		for line in open(os.path.join(Paths.lib, fn)).read().splitlines():
-			# Remove relevant whitespace.
+			# Remove irrelevant whitespace.
 			line = line.strip()
 			if line.startswith("import"):
 				# Remove "import" and whitespace. Split by ",".
-				for mod in "".join(line.split()[1:]).split(","):
+				for mod in " ".join(line.split()[1:]).split(","):
+					# Get the actual module imported by "as" imports.
+					if " as " in mod:
+						mod = mod.split(" as ")[0]
+					mod = mod.replace(" ", "")
 					# Get base module (FindModule can't find submodules)
 					if not FindModule(mod.split(".")[0]):
 						alert("The required module '" + mod + "' could not be found.")
 						sys.exit(1)
 
-# Start the game here...
+# It's finally time to start the game.
+
+import Engine
+
+# Load launcher window
+Engine.LoadLevel("launcher.hzh")

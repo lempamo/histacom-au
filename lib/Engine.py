@@ -14,27 +14,31 @@
 # You should have received a copy of the GNU General Public License
 # along with Histacom.AU.  If not, see <http://www.gnu.org/licenses/>.
 #
-# String.py - serialisable classes for the two binary string types
+# Engine.py - take a wild guess what this is
 
-import HistLib
+import pygame_sdl2
 
-class CString(HistLib.Format):
-	def _LoadF(self, fobj):
-		self.pystr = HistLib.ReadCString(fobj)
-	def _SaveF(self, fobj):
-		HistLib.WriteCString(fobj, self.pystr)
-	def _New(self):
-		self.pystr = ""
-	def Load(self, argument):
-		if isinstance(argument, str):
-			self.pystr = argument
-		elif isinstance(argument, file):
-			return self._LoadF(argument)
-		else:
-			raise InvalidArgumentException
+pygame_sdl2.init()
 
-class OString(CString):
-	def _LoadF(self, fobj):
-		self.pystr = HistLib.ReadOString(fobj)
-	def _SaveF(self, fobj):
-		HistLib.WriteOString(fobj, self.pystr)
+assets = {}
+entities = []
+
+i = pygame_sdl2.display.Info()
+screenWidth = i.current_w
+screenHeight = i.current_h
+del i
+
+modeWidth = -1
+modeHeight = -1
+gamewindow = None
+updateRects = []
+
+def setResolution(width, height, flags = 0):
+	global modeWidth, modeHeight, gamewindow, updateRects
+	modeWidth = width
+	modeHeight = height
+	gamewindow = pygame_sdl2.display.set_mode((screenWidth, screenHeight), flags)
+	updateRects = [(0, 0, screenWidth, screenHeight)]
+
+def configureBg(self):
+	
