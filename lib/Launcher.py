@@ -28,7 +28,7 @@ class LauncherButton(Element.Sprite):
 	def __init__(self, win, x, y, out, over, action):
 		self.out = Engine.currlvl.header.theme[out].obj
 		self.over = Engine.currlvl.header.theme[over].obj
-		Element.Sprite.__init__(self, win, x, y, self.out)
+		Element.Sprite.__init__(self, win, x, y, out)
 		self.action = action
 		self.events = {Events.MOUSEOUT: self.mouseout,
 					Events.MOUSEOVER: self.mouseover,
@@ -46,5 +46,6 @@ def quitGame():
 
 def startLevel():
 	launcherwin = Engine.wm.createWindow(478, 322)
+	launcherwin.addObj(Element.Sprite, 0, 0, "launcherbg")
 	launcherwin.addObj(LauncherButton, 0, 93, "newout", "newover", newGame)
 	launcherwin.addObj(LauncherButton, 427, 293, "exitout", "exitover", quitGame)

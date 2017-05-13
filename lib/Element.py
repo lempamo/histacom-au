@@ -33,7 +33,7 @@ class Sprite(Element):
 		self.win = win
 		self._x = x
 		self._y = y
-		self.image = image
+		self.image = Engine.currlvl.header.theme[image].obj
 	
 	def setpos(self, x, y):
 		oldrect = self.rect

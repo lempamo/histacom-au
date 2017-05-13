@@ -20,7 +20,7 @@ import Engine, HStruct, Events, Element
 import pygame_sdl2
 
 # Window class
-exec(HStruct.Gwe("Window", "wm", "w", "h", "x", "y", "objs", "hover") + """
+exec(HStruct.Gwe("Window", "Engine.wm", "w", "h", "x", "y", "objs", "hover") + """
 	def mouse(self, x, y):
 		rel = (x - self.x, y - self.y)
 		for obj in self.objs:
@@ -50,7 +50,7 @@ class Man:
 		self.windows.append(win)
 		return win
 	
-	exec(HStruct.Sts("w", "h", "x", "y", "objs"))
+	exec(HStruct.Sts("w", "h", "x", "y", "objs", "hover"))
 
 # Used for the launcher. Does not actually manage windows.
 class Shim(Man):
