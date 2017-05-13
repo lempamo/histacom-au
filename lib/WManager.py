@@ -21,7 +21,7 @@ import pygame_sdl2
 
 # Window class
 exec(HStruct.Gwe("Window", "Engine.wm", "w", "h", "x", "y", "objs", "hover") + """
-	def mouse(self, x, y):
+	def mouse(self, x, y, event):
 		rel = (x - self.x, y - self.y)
 		for obj in self.objs:
 			if obj != self.hover:
@@ -30,6 +30,8 @@ exec(HStruct.Gwe("Window", "Engine.wm", "w", "h", "x", "y", "objs", "hover") + "
 						self.hover.event(Events.MOUSEOUT)
 					self.hover = obj
 					self.hover.event(Events.MOUSEOVER)
+					if event:
+						self.hover.event(event)
 	def update(self):
 		for obj in self.objs:
 			obj.update()
@@ -55,8 +57,9 @@ class Man:
 # Used for the launcher. Does not actually manage windows.
 class Shim(Man):
 	def __init__(self):
-		self.windows = []
+		Man.__init__(self)
 		Engine.setResolution(800, 600)
+		pygame_sdl2.display.set_caption("Welcome to Histacom.AU")
 	
 	def createWindow(self, w, h, x = -1, y = -1):
 		Engine.setResolution(w, h)
@@ -66,10 +69,13 @@ class Shim(Man):
 		Engine.gamewindow.blit(image, (x, y))
 	
 	def updateGame(self):
-		mousepos = pygame_sdl2.mouse.get_pos()
+		hevent = None
+		for pyevent in Engine.events:
+			if pyevent.type == pygame_sdl2.MOUSEBUTTONUP:
+				hevent = Events.MOUSEUP
 		for win in self.windows:
-			if win.rect.collidepoint(mousepos):
-				win.mouse(*mousepos)
+			if win.rect.collidepoint(Engine.mousepos):
+				win.mouse(*Engine.mousepos + (hevent,))
 			win.update()
 
 # Standard floating window manager. This or a derivative of it will
