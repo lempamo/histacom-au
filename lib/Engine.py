@@ -17,6 +17,10 @@
 # Engine.py - take a wild guess what this is
 
 import pygame_sdl2
+import Cluster
+import HStruct
+import Paths
+import os
 
 pygame_sdl2.init()
 
@@ -28,17 +32,63 @@ screenWidth = i.current_w
 screenHeight = i.current_h
 del i
 
+timer = pygame_sdl2.time.Clock()
+
 modeWidth = -1
 modeHeight = -1
 gamewindow = None
 updateRects = []
 
+currlvl = None
+wm = None
+
+timeDelta = 0
+timeTotal = 0
+
+callbacks = {}
+
+exec(HStruct.Gen("Asset", "name", "obj"))
+
+def callback(delay, fun, args):
+	global callbacks, timeTotal
+	callbacks[timeTotal + delay] = (fun, args)
+
 def setResolution(width, height, flags = 0):
 	global modeWidth, modeHeight, gamewindow, updateRects
 	modeWidth = width
 	modeHeight = height
-	gamewindow = pygame_sdl2.display.set_mode((screenWidth, screenHeight), flags)
-	updateRects = [(0, 0, screenWidth, screenHeight)]
+	gamewindow = pygame_sdl2.display.set_mode((width, height), flags)
+	updateRects = [(0, 0, width, height)]
 
-def configureBg(self):
+def loadGraphic(fname):
+	return pygame_sdl2.image.load(os.path.join(Paths.assets, fname)).convert()
+
+def loadResource(fname):
+	if fname.startswith("graphics"):
+		return Asset(fname, loadGraphic(fname))
+	else:
+		with open(fname) as f:
+			return Asset(fname, f.read())
+
+def loadLevel(fname):
+	global currlvl, wm, updateRects, timeDelta, timeTotal
+	currlvl = Cluster.Cluster(os.path.join(Paths.assets, "levels", fname))
+	currlvl.loop = True
+	currlvl.tail = None
+	currlvl.args = ()
+	wm = currlvl.header.wm
 	
+	currlvl.header.scr.startLevel()
+	
+	while currlvl.loop:
+		timeDelta = timer.tick()
+		timeTotal += timeDelta
+		for point, (fun, args) in callbacks.iteritems():
+			if timeTotal >= point:
+				fun(*args)
+				callbacks.remove(point) 
+		wm.updateGame()
+		pygame_sdl2.display.update(updateRects)
+			
+	if currlvl.tail:
+		currlvl.tail(*currlvl.args)

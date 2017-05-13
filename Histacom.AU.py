@@ -171,4 +171,4 @@ for fn in files:
 import Engine
 
 # Load launcher window
-Engine.LoadLevel("launcher.hzh")
+Engine.loadLevel("launcher.hzh")

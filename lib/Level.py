@@ -16,7 +16,7 @@
 #
 # Level.py - class for storing level metadata
 
-import HistLib, String, WManager
+import HistLib, String, WManager, Engine, importlib
 
 class Level(HistLib.Format):
 	def _LoadF(self, fobj):
@@ -24,16 +24,22 @@ class Level(HistLib.Format):
 			raise HistLib.WrongFiletypeException("This is not a Histacom.AU level")
 		self.year = HistLib.shortstruct.unpack(fobj.read(2))[0] # year 32769 bug!
 		self.wm = eval(HistLib.ReadOString(fobj))()
+		self.scr = importlib.import_module(HistLib.ReadOString(fobj))
 		for x in range(0, HistLib.shortstruct.unpack(fobj.read(2))[0]):
-			self.deps.append(HistLib.ReadOString(fobj))
+			key = HistLib.ReadOString(fobj)
+			fname = HistLib.ReadOString(fobj)
+			self.theme[key] = Engine.loadResource(fname)
 	def _SaveF(self, fobj):
 		fobj.write("HILL")
 		fobj.write(HistLib.shortstruct.pack(self.year))
-		fobj.write(HistLib.shortstruct.pack(len(self.deps)))
 		HistLib.WriteOString(fobj, str(self.wm.__class__))
-		for dep in self.deps:
-			HistLib.WriteOString(fobj, dep)
+		HistLib.WriteOString(fobj, str(self.scr.__name__))
+		fobj.write(HistLib.shortstruct.pack(len(self.theme)))
+		for key, asset in self.theme.iteritems():
+			HistLib.WriteOString(fobj, key)
+			HistLib.WriteOString(fobj, asset.name)
 	def _New(self):
 		self.year = 0
-		self.deps = []
+		self.theme = {}
 		self.wm = None
+		self.scr = None

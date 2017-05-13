@@ -24,7 +24,7 @@ import String
 
 import Level
 
-class ClusterF(HistLib.Format):
+class Cluster(HistLib.Format):
 	def _LoadF(self, fileobj):
 		if fileobj.read(4) != "Clus":
 			raise HistLib.WrongFiletypeException("This is not a Cluster file")

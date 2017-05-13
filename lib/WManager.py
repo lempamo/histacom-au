@@ -16,20 +16,63 @@
 #
 # WManager.py - Window manager implementations
 
-import Engine, HStruct
+import Engine, HStruct, Events, Element
+import pygame_sdl2
 
-# Window struct
-exec(HStruct.Gen("Window", "w", "h", "x", "y"))	
+# Window class
+exec(HStruct.Gwe("Window", "wm", "w", "h", "x", "y", "objs", "hover") + """
+	def mouse(self, x, y):
+		rel = (x - self.x, y - self.y)
+		for obj in self.objs:
+			if obj != self.hover:
+				if isinstance(obj, Element.Sprite) and obj.rect.collidepoint(rel):
+					if self.hover:
+						self.hover.event(Events.MOUSEOUT)
+					self.hover = obj
+					self.hover.event(Events.MOUSEOVER)
+	def update(self):
+		for obj in self.objs:
+			obj.update()
+	def blit(self, image, x, y):
+		Engine.wm.blit(self, image, x, y)
+	def addObj(self, cls, *args):
+		self.objs.append(cls(*(self,) + args))
+	rect = property(lambda self: pygame_sdl2.Rect(self.x, self.y, self.w, self.h))
+""")
 
-# Change mode to window size and stick in (0, 0). So, don't do much.
-# Used for the launcher. Bad idea to try multiple windows on it.
-class Shim:
+# Base class for all implementations.
+class Man:
 	def __init__(self):
 		self.windows = []
 	
 	def createWindow(self, w, h, x = -1, y = -1):
-		if len(self.freedWindowSlots) > 0:
-			entityId = min(freedWindowSlots)
-			freedEntitySlots.remove(entityId)
-		else:
-			entityId = len(entities)
+		win = Window(w, h, x, y, [], None)
+		self.windows.append(win)
+		return win
+	
+	exec(HStruct.Sts("w", "h", "x", "y", "objs"))
+
+# Used for the launcher. Does not actually manage windows.
+class Shim(Man):
+	def __init__(self):
+		self.windows = []
+		Engine.setResolution(800, 600)
+	
+	def createWindow(self, w, h, x = -1, y = -1):
+		Engine.setResolution(w, h)
+		return Man.createWindow(self, w, h, 0, 0)
+	
+	def blit(self, window, image, x, y):
+		Engine.gamewindow.blit(image, (x, y))
+	
+	def updateGame(self):
+		mousepos = pygame_sdl2.mouse.get_pos()
+		for win in self.windows:
+			if win.rect.collidepoint(mousepos):
+				win.mouse(*mousepos)
+			win.update()
+
+# Standard floating window manager. This or a derivative of it will
+# probably be used in most levels.
+class Floating(Man):
+	pass
