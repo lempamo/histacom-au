@@ -86,12 +86,17 @@ def getLevel(fname):
 
 def loadLevelCluster(clus):
 	global currlvl, wm, theme, updateRects, timeDelta, timeTotal, mousepos, events, modeWidth, modeHeight
-	currlvl = clus
-	currlvl.loop = True
-	currlvl.tail = None
-	currlvl.args = ()
-	wm = currlvl.header.wm()
-	theme = {key:loadResource(value) for key, value in currlvl.header.theme.iteritems()}
+	newlvl = clus
+	newlvl.loop = True
+	newlvl.tail = None
+	newlvl.args = ()
+	wm = newlvl.header.wm()
+	theme = {key:loadResource(value) for key, value in newlvl.header.theme.iteritems()}
+	if currlvl:
+		for (name, persist) in currlvl.header.mutables:
+			if persist:
+				newlvl.__dict__[name] = currlvl.__dict__[name]
+	currlvl = newlvl
 	
 	currlvl.header.scr.startLevel()
 	
