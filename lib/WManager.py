@@ -45,7 +45,8 @@ exec(HStruct.Gwe("Window", "Engine.wm", "w", "h", "x", "y", "objs", "hover") + "
 	rect = property(lambda self: pygame_sdl2.Rect(self.x, self.y, self.w, self.h))
 """)
 
-# Base class for all implementations.
+# Base class for all implementations. Derivatives should define blit()
+# and updateGame().
 class Man:
 	def __init__(self):
 		self.windows = []
@@ -61,7 +62,7 @@ class Man:
 class Shim(Man):
 	def __init__(self):
 		Man.__init__(self)
-		Engine.setResolution(800, 600)
+		Engine.setResolution(478, 322)
 		pygame_sdl2.display.set_caption("Welcome to Histacom.AU")
 	
 	def createWindow(self, w, h, x = -1, y = -1):

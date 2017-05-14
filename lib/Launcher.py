@@ -16,7 +16,7 @@
 #
 # Launcher.py - script file for "launcher.hzh"
 
-import Engine, Element, Events, pygame_sdl2, sys, HistLib
+import Engine, Element, Events, sys, HistLib
 
 class LauncherButton(Element.Sprite):
 	def mouseout(self):
