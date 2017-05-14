@@ -29,6 +29,10 @@ class Level(HistLib.Format):
 			key = HistLib.ReadOString(fobj)
 			fname = HistLib.ReadOString(fobj)
 			self.theme[key] = Engine.loadResource(fname)
+		for x in range(0, HistLib.shortstruct.unpack(fobj.read(2))[0]):
+			persist = bool(ord(fobj.read(1)))
+			name = HistLib.ReadOString(fobj)
+			self.mutables.append((name, persist))
 	def _SaveF(self, fobj):
 		fobj.write("HILL")
 		fobj.write(HistLib.shortstruct.pack(self.year))
@@ -38,8 +42,13 @@ class Level(HistLib.Format):
 		for key, asset in self.theme.iteritems():
 			HistLib.WriteOString(fobj, key)
 			HistLib.WriteOString(fobj, asset.name)
+		fobj.write(HistLib.shortstruct.pack(len(self.mutables)))
+		for (name, persist) in self.mutables:
+			fobj.write(chr(persist))
+			HistLib.WriteOString(fobj, name)
 	def _New(self):
 		self.year = 0
 		self.theme = {}
 		self.wm = None
 		self.scr = None
+		self.mutables = []
