@@ -23,22 +23,25 @@ import pygame_sdl2
 exec(HStruct.Gwe("Window", "Engine.wm", "w", "h", "x", "y", "objs", "hover") + """
 	def mouse(self, x, y, event):
 		rel = (x - self.x, y - self.y)
-		for obj in self.objs:
-			if obj != self.hover:
-				if isinstance(obj, Element.Sprite) and obj.rect.collidepoint(rel):
+		for obj in reversed(self.objs):
+			if isinstance(obj, Element.Sprite) and obj.rect.collidepoint(rel):
+				if self.hover != obj:
 					if self.hover:
 						self.hover.event(Events.MOUSEOUT)
 					self.hover = obj
 					self.hover.event(Events.MOUSEOVER)
-					if event:
-						self.hover.event(event)
+				if event:
+					obj.event(event)
+				break
 	def update(self):
 		for obj in self.objs:
 			obj.update()
 	def blit(self, image, x, y):
 		Engine.wm.blit(self, image, x, y)
 	def addObj(self, cls, *args):
-		self.objs.append(cls(*(self,) + args))
+		obj = cls(*(self,) + args)
+		self.objs.append(obj)
+		return obj
 	rect = property(lambda self: pygame_sdl2.Rect(self.x, self.y, self.w, self.h))
 """)
 

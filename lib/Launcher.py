@@ -16,18 +16,28 @@
 #
 # Launcher.py - script file for "launcher.hzh"
 
-import Engine, Element, Events, pygame_sdl2, sys
+import Engine, Element, Events, pygame_sdl2, sys, HistLib
 
 class LauncherButton(Element.Sprite):
 	def mouseout(self):
+		global helptext, helpdef
 		self.image = self.out
+		if self.helpim:
+			helptext.image = helpdef
 
 	def mouseover(self):
+		global helptext
 		self.image = self.over
+		if self.helpim:
+			helptext.image = self.helpim
 
-	def __init__(self, win, x, y, out, over, action):
+	def __init__(self, win, x, y, out, over, helpim, action):
 		self.out = Engine.currlvl.header.theme[out].obj
 		self.over = Engine.currlvl.header.theme[over].obj
+		if helpim:
+			self.helpim = Engine.currlvl.header.theme[helpim].obj
+		else:
+			self.helpim = None
 		Element.Sprite.__init__(self, win, x, y, out)
 		self.action = action
 		self.events = {Events.MOUSEOUT: self.mouseout,
@@ -45,7 +55,12 @@ def quitGame():
 	Engine.currlvl.tail = sys.exit
 
 def startLevel():
+	global helptext, helpdef
+	helpdef = Engine.currlvl.header.theme["helpgs"].obj
 	launcherwin = Engine.wm.createWindow(478, 322)
 	launcherwin.addObj(Element.Sprite, 0, 0, "launcherbg")
-	launcherwin.addObj(LauncherButton, 0, 93, "newout", "newover", newGame)
-	launcherwin.addObj(LauncherButton, 427, 293, "exitout", "exitover", quitGame)
+	helptext = launcherwin.addObj(Element.Sprite, 179, 93, "helpgs")
+	launcherwin.addObj(LauncherButton, 0, 93, "newout", "newover", "helpng", newGame)
+	launcherwin.addObj(LauncherButton, 0, 118, "contout", "contover", "helpcg", lambda: HistLib.alert("unsupported"))
+	launcherwin.addObj(LauncherButton, 0, 143, "loadout", "loadover", "helplg", lambda: HistLib.alert("unsupported"))
+	launcherwin.addObj(LauncherButton, 427, 293, "exitout", "exitover", None, quitGame)

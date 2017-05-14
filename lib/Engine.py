@@ -71,7 +71,7 @@ def loadResource(fname):
 			return Asset(fname, f.read())
 
 def loadLevel(fname):
-	global currlvl, wm, updateRects, timeDelta, timeTotal, mousepos, events
+	global currlvl, wm, updateRects, timeDelta, timeTotal, mousepos, events, modeWidth, modeHeight
 	currlvl = Cluster.Cluster(os.path.join(Paths.assets, "levels", fname))
 	currlvl.loop = True
 	currlvl.tail = None
@@ -84,6 +84,9 @@ def loadLevel(fname):
 		timeDelta = timer.tick()
 		timeTotal += timeDelta
 		events = [event for event in pygame_sdl2.event.get()]
+		for event in events:
+			if event.type == pygame_sdl2.ACTIVEEVENT:
+				updateRects = [(0, 0, modeWidth, modeHeight)]
 		mousepos = pygame_sdl2.mouse.get_pos()
 		for point, (fun, args) in callbacks.iteritems():
 			if timeTotal >= point:
@@ -91,6 +94,7 @@ def loadLevel(fname):
 				callbacks.remove(point) 
 		wm.updateGame()
 		pygame_sdl2.display.update(updateRects)
+		updateRects = []	
 			
 	if currlvl.tail:
 		currlvl.tail(*currlvl.args)
