@@ -131,3 +131,9 @@ def loadLevel(loadFrom):
 		loadLevelCluster(clus)
 	else:
 		raise HistLib.InvalidArgumentException
+
+def endLevel(function, arguments = ()):
+	global currlvl
+	currlvl.loop = False
+	currlvl.tail = function
+	currlvl.args = arguments

@@ -46,13 +46,10 @@ class LauncherButton(Element.Sprite):
 					
 
 def newGame():
-	Engine.currlvl.loop = False
-	Engine.currlvl.tail = Engine.loadLevel
-	Engine.currlvl.args = ["1998.hzh"]
+	Engine.endlevel(Engine.loadLevel, ["1998.hzh"])
 
 def quitGame():
-	Engine.currlvl.loop = False
-	Engine.currlvl.tail = sys.exit
+	Engine.endLevel(sys.exit)
 
 def startLevel():
 	global helptext, helpdef
