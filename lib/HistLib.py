@@ -85,10 +85,11 @@ class Format:
 		if loadFrom:
 			self.Load(loadFrom)
 
-# Useful functions from __main__.
+# Useful symbols from __main__.
 try:
 	FindModule = __main__.FindModule
 	alert = __main__.alert
+	productName = __main__.productName
 except:
 	pass
 

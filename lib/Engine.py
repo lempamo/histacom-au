@@ -20,8 +20,10 @@ import pygame_sdl2
 import Cluster
 import HStruct
 import Paths
+import HistLib
 import os
 
+pygame_sdl2.mixer.pre_init(44100)
 pygame_sdl2.init()
 
 assets = {}
@@ -40,7 +42,10 @@ gamewindow = None
 updateRects = []
 
 currlvl = None
+lvlname = None
 wm = None
+
+playername = None
 
 timeDelta = 0
 timeTotal = 0
@@ -61,22 +66,32 @@ def setResolution(width, height, flags = 0):
 	updateRects = [(0, 0, width, height)]
 
 def loadGraphic(fname):
-	return pygame_sdl2.image.load(os.path.join(Paths.assets, fname)).convert()
+	return pygame_sdl2.image.load(fname).convert()
+
+def loadSound(fname):
+	return pygame_sdl2.mixer.Sound(fname)
 
 def loadResource(fname):
+	name = os.path.join(Paths.assets, fname)
 	if fname.startswith("graphics"):
-		return Asset(fname, loadGraphic(fname))
+		return Asset(fname, loadGraphic(name))
+	elif fname.startswith("sounds"):
+		return Asset(fname, loadSound(name))
 	else:
-		with open(fname) as f:
-			return Asset(fname, f.read())
+		with open(name) as f:
+			return Asset(name, f.read())
 
-def loadLevel(fname):
-	global currlvl, wm, updateRects, timeDelta, timeTotal, mousepos, events, modeWidth, modeHeight
-	currlvl = Cluster.Cluster(os.path.join(Paths.assets, "levels", fname))
+def getLevel(fname):
+	return os.path.join(Paths.assets, "levels", fname)
+
+def loadLevelCluster(clus):
+	global currlvl, wm, theme, updateRects, timeDelta, timeTotal, mousepos, events, modeWidth, modeHeight
+	currlvl = clus
 	currlvl.loop = True
 	currlvl.tail = None
 	currlvl.args = ()
-	wm = currlvl.header.wm
+	wm = currlvl.header.wm()
+	theme = {key:loadResource(value) for key, value in currlvl.header.theme.iteritems()}
 	
 	currlvl.header.scr.startLevel()
 	
@@ -98,3 +113,16 @@ def loadLevel(fname):
 			
 	if currlvl.tail:
 		currlvl.tail(*currlvl.args)
+
+def loadLevelStr(fname):
+	global lvlname
+	lvlname = fname
+	loadLevelCluster(Cluster.Cluster(getLevel(fname)))
+
+def loadLevel(loadFrom):
+	if isinstance(loadFrom, str):
+		loadLevelStr(loadFrom)
+	elif isinstance(loadFrom, Cluster.Cluster):
+		loadLevelCluster(clus)
+	else:
+		raise HistLib.InvalidArgumentException

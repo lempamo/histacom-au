@@ -16,23 +16,26 @@
 #
 # WManager.py - Window manager implementations
 
-import Engine, HStruct, Events, Element
+import Engine, HStruct, Events, Element, HistLib
 import pygame_sdl2
 
 # Window class
-exec(HStruct.Gwe("Window", "Engine.wm", "w", "h", "x", "y", "objs", "hover") + """
+exec(HStruct.Gwe("Window", "Engine.wm", "w", "h", "x", "y", "objs", "hover", "events") + """
 	def mouse(self, x, y, event):
-		rel = (x - self.x, y - self.y)
-		for obj in reversed(self.objs):
-			if isinstance(obj, Element.Sprite) and obj.rect.collidepoint(rel):
-				if self.hover != obj:
-					if self.hover:
-						self.hover.event(Events.MOUSEOUT)
-					self.hover = obj
-					self.hover.event(Events.MOUSEOVER)
-				if event:
-					obj.event(event)
-				break
+		if event in self.events:
+			self.events[event]()
+		else:
+			rel = (x - self.x, y - self.y)
+			for obj in reversed(self.objs):
+				if isinstance(obj, Element.Sprite) and obj.rect.collidepoint(rel):
+					if self.hover != obj:
+						if self.hover:
+							self.hover.event(Events.MOUSEOUT)
+						self.hover = obj
+						self.hover.event(Events.MOUSEOVER)
+					if event:
+						obj.event(event)
+					break
 	def update(self):
 		for obj in self.objs:
 			obj.update()
@@ -52,18 +55,35 @@ class Man:
 		self.windows = []
 	
 	def createWindow(self, w, h, x = -1, y = -1):
-		win = Window(w, h, x, y, [], None)
+		win = Window(w, h, x, y, [], None, [])
 		self.windows.append(win)
 		return win
 	
-	exec(HStruct.Sts("w", "h", "x", "y", "objs", "hover"))
+	def getEvent(self):
+		hevent = None
+		for pyevent in Engine.events:
+			if pyevent.type == pygame_sdl2.MOUSEBUTTONUP:
+				hevent = Events.MOUSEUP
+			elif pyevent.type == pygame_sdl2.KEYDOWN or pyevent.type == pygame_sdl2.KEYUP:
+				tmp = "KEY"
+				if pyevent.type == pygame_sdl2.KEYDOWN:
+					tmp += "DOWN"
+				else:
+					tmp += "UP"
+				tmp += pygame_sdl2.key.name(pyevent.key)
+				if tmp in Events.events:
+					hevent = eval("Events." + tmp)
+				del tmp
+		return hevent
+	
+	exec(HStruct.Sts("w", "h", "x", "y", "objs", "hover", "events"))
 
 # Used for the launcher. Does not actually manage windows.
 class Shim(Man):
 	def __init__(self):
 		Man.__init__(self)
 		Engine.setResolution(478, 322)
-		pygame_sdl2.display.set_caption("Welcome to Histacom.AU")
+		pygame_sdl2.display.set_caption("Welcome to " + HistLib.productName)
 	
 	def createWindow(self, w, h, x = -1, y = -1):
 		Engine.setResolution(w, h)
@@ -73,10 +93,7 @@ class Shim(Man):
 		Engine.gamewindow.blit(image, (x, y))
 	
 	def updateGame(self):
-		hevent = None
-		for pyevent in Engine.events:
-			if pyevent.type == pygame_sdl2.MOUSEBUTTONUP:
-				hevent = Events.MOUSEUP
+		hevent = self.getEvent()
 		for win in self.windows:
 			if win.rect.collidepoint(Engine.mousepos):
 				win.mouse(*Engine.mousepos + (hevent,))

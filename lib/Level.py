@@ -23,12 +23,12 @@ class Level(HistLib.Format):
 		if fobj.read(4) != "HILL":
 			raise HistLib.WrongFiletypeException("This is not a Histacom.AU level")
 		self.year = HistLib.shortstruct.unpack(fobj.read(2))[0] # year 32769 bug!
-		self.wm = eval(HistLib.ReadOString(fobj))()
+		self.wm = eval(HistLib.ReadOString(fobj))
 		self.scr = importlib.import_module(HistLib.ReadOString(fobj))
 		for x in range(0, HistLib.shortstruct.unpack(fobj.read(2))[0]):
 			key = HistLib.ReadOString(fobj)
 			fname = HistLib.ReadOString(fobj)
-			self.theme[key] = Engine.loadResource(fname)
+			self.theme[key] = fname
 		for x in range(0, HistLib.shortstruct.unpack(fobj.read(2))[0]):
 			persist = bool(ord(fobj.read(1)))
 			name = HistLib.ReadOString(fobj)
@@ -36,12 +36,12 @@ class Level(HistLib.Format):
 	def _SaveF(self, fobj):
 		fobj.write("HILL")
 		fobj.write(HistLib.shortstruct.pack(self.year))
-		HistLib.WriteOString(fobj, str(self.wm.__class__))
+		HistLib.WriteOString(fobj, str(self.wm))
 		HistLib.WriteOString(fobj, str(self.scr.__name__))
 		fobj.write(HistLib.shortstruct.pack(len(self.theme)))
 		for key, asset in self.theme.iteritems():
 			HistLib.WriteOString(fobj, key)
-			HistLib.WriteOString(fobj, asset.name)
+			HistLib.WriteOString(fobj, asset)
 		fobj.write(HistLib.shortstruct.pack(len(self.mutables)))
 		for (name, persist) in self.mutables:
 			fobj.write(chr(persist))

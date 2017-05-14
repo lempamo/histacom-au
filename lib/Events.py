@@ -22,6 +22,10 @@ events = ["MOUSEOVER",
 		"MOUSEDOWN",
 		"MOUSEUP"]
 
+# Keyboard events.
+for act in ["UP", "DOWN"]:
+	events += ["KEY" + act + chr(x) for x in range(ord("0"), ord("9")) + range(ord("A"), ord("Z"))]
+
 # Doesn't do anything, but you can compare instances of it.
 class EventID:
 	pass
