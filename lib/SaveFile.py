@@ -29,7 +29,7 @@ class SaveFile(HistLib.Format):
 		fobj.write("Save")
 		fobj.write(HistLib.shortstruct.pack(self.year))
 		HistLib.WriteOString(fobj, self.level)
-		self.getcluster().Save(fobj)
+		self.cluster.Save(fobj)
 	def _New(self):
 		self.year = 0
 		self.level = ""
@@ -39,6 +39,7 @@ class SaveFile(HistLib.Format):
 		if not self.cluster
 			self.cluster = Cluster.Cluster(self.fobj)
 		return self.cluster
+	cluster = property(getcluster)
 
 def LoadGame(loadfrom):
 	if isinstance(loadfrom, str) or isinstance(loadfrom, file):
@@ -63,7 +64,7 @@ def SaveGame(saveto):
 
 def GenCode():
 	if hasattr(Engine.currlvl, "playername"):
-		code = Engine.currlvl.playername.pystr
+		code = str(Engine.currlvl.playername)
 		b = str(len(code))
 		code += "".join([random.choice(string.printable[:-38]) for x in range(0, 10 - len(code))])
 		code += b
@@ -89,9 +90,8 @@ def LoadCode(code):
 			char = char.swapcase()
 		new += char
 	new = new.encode("rot13")
-	if new[:11] != "CHOSENONAME":
-		playername = new[:int(new[10])]
 	lvlname = new[11:] + ".hzh"
 	level = Cluster.Cluster(lvlname)
-	level.playername = String.OString(playername)
+	if new[:11] != "CHOSENONAME":
+		level.playername = String.OString(new[:int(new[10])])
 	Engine.loadLevel(level)

@@ -21,6 +21,7 @@ import Cluster
 import HStruct
 import Paths
 import HistLib
+import Fonts
 import os
 
 pygame_sdl2.mixer.pre_init(44100)
@@ -45,14 +46,10 @@ currlvl = None
 lvlname = None
 wm = None
 
-playername = None
-
 timeDelta = 0
 timeTotal = 0
 
 callbacks = {}
-
-exec(HStruct.Gen("Asset", "name", "obj"))
 
 def callback(delay, fun, args):
 	global callbacks, timeTotal
@@ -65,27 +62,25 @@ def setResolution(width, height, flags = 0):
 	gamewindow = pygame_sdl2.display.set_mode((width, height), flags)
 	updateRects = [(0, 0, width, height)]
 
-def loadGraphic(fname):
-	return pygame_sdl2.image.load(fname).convert()
-
-def loadSound(fname):
-	return pygame_sdl2.mixer.Sound(fname)
+loaders = {"graphics": lambda x: pygame_sdl2.image.load(x).convert(),
+		"sounds": pygame_sdl2.mixer.Sound,
+		"fonts": Fonts.Font}
 
 def loadResource(fname):
 	name = os.path.join(Paths.assets, fname)
-	if fname.startswith("graphics"):
-		return Asset(fname, loadGraphic(name))
-	elif fname.startswith("sounds"):
-		return Asset(fname, loadSound(name))
-	else:
-		with open(name) as f:
-			return Asset(name, f.read())
+	for dirname, loader in loaders.iteritems():
+		if fname.startswith(dirname):
+			return loader(name)
+	with open(name) as f:
+		# Fallback: contents of file as string
+		return f.read()
 
 def getLevel(fname):
 	return os.path.join(Paths.assets, "levels", fname)
 
 def loadLevelCluster(clus):
 	global currlvl, wm, theme, updateRects, timeDelta, timeTotal, mousepos, events, modeWidth, modeHeight
+	timeTotal = 0
 	newlvl = clus
 	newlvl.loop = True
 	newlvl.tail = None
@@ -128,7 +123,7 @@ def loadLevel(loadFrom):
 	if isinstance(loadFrom, str):
 		loadLevelStr(loadFrom)
 	elif isinstance(loadFrom, Cluster.Cluster):
-		loadLevelCluster(clus)
+		loadLevelCluster(loadFrom)
 	else:
 		raise HistLib.InvalidArgumentException
 

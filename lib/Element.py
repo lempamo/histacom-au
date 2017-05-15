@@ -16,10 +16,10 @@
 #
 # Element.py - component of a window
 
-import Engine, pygame_sdl2
+import Engine, HistLib, pygame_sdl2
 
 # Derivatives should define update().
-class Element(object):
+class Element(HistLib.saneobject):
 	def __init__(self):
 		self.events = {}
 	def event(self, event):
@@ -33,7 +33,7 @@ class Sprite(Element):
 		self.win = win
 		self._x = x
 		self._y = y
-		self.image = Engine.theme[image].obj
+		self.image = Engine.theme[image]
 	
 	def setpos(self, x, y):
 		oldrect = self.rect

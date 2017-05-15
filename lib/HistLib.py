@@ -53,9 +53,18 @@ def ReadOString(myFile):
 def WriteOString(myFile, myString):
 	myFile.write(chr(len(myString)) + myString)
 
+# A "new-style" object with an "old-style" string representation.
+class _sanebase(type):
+	def __str__(self):
+		# Chop off stupid Python 3-esque fluff.
+		return repr(self)[8:-2]
+
+class saneobject(object):
+	__metaclass__ = _sanebase
+
 # Generic class for a file format. Derived classes should define:
 # _LoadF(self, fileobj) _SaveF(self, fileobj) _New(self)
-class Format:
+class Format(saneobject):
 	def _LoadStr(self, filename):
 		with open(filename, "rb") as myFile:
 			return self._LoadF(myFile)

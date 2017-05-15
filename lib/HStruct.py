@@ -17,11 +17,13 @@
 # HStruct.py - replicates the functionality of a C Struct in Python and
 # provides optional setter encapsulation
 
+import HistLib
+
 # Returns a class definition. Usage:
 # exec(HStruct.Gen("Window", "w", "h", "x", "y"))
 def Gen(clsname, *args):
 	return ("""
-class {0}(object):
+class {0}(HistLib.saneobject):
 	def __init__(self, {1}):
 """.format(clsname,
 	", ".join(args)) +

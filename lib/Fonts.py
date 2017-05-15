@@ -14,30 +14,20 @@
 # You should have received a copy of the GNU General Public License
 # along with Histacom.AU.  If not, see <http://www.gnu.org/licenses/>.
 #
-# String.py - serialisable classes for the two binary string types
+# Fonts.py - wrapper for pygame fonts to make them less annoying
 
-import HistLib
+import HStruct, HistLib, pygame_sdl2, cStringIO
 
-# Base class for Binary Strings. Derivatives should define _LoadF and
-# _SaveF.
-class BString(HistLib.Format):
-	def _New(self):
-		self.pystr = ""
-	def Load(self, argument):
-		if isinstance(argument, str):
-			self.pystr = argument
-		elif isinstance(argument, file):
-			return self._LoadF(argument)
-		else:
-			raise InvalidArgumentException
-	def __str__(self):
-		return self.pystr
-
-for x in ["C", "O"]:
-	exec("""
-class {0}String(BString):
-	def _LoadF(self, fobj):
-		self.pystr = HistLib.Read{0}String(fobj)
-	def _SaveF(self, fobj):
-		HistLib.Write{0}String(fobj, self.pystr)
-""".format(x))
+class Font(HistLib.saneobject):
+	def __init__(self, fname):
+		with open(fname) as f:
+			data = f.read()
+		self.stream = cStringIO.StringIO(data)
+		self._pyfonts = {}
+	def initSize(self, size):
+		if size not in self._pyfonts:
+			self._pyfonts[size] = pygame_sdl2.font.Font(self.stream, size)
+			self.stream.seek(0)
+	def __getitem__(self, size):
+		self.initSize(size)
+		return self._pyfonts[size]
