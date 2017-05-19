@@ -28,11 +28,11 @@ class Cluster(HistLib.Format):
 	def _LoadF(self, fileobj):
 		if fileobj.read(4) != "Clus":
 			raise HistLib.WrongFiletypeException("This is not a Cluster file")
-		fileobj.seek(HistLib.longstruct.unpack(fileobj.read(4))[0])
-		entrynum = HistLib.longstruct.unpack(fileobj.read(4))[0]
+		fileobj.seek(HistLib.ReadBytes(fileobj, 4))
+		entrynum = HistLib.ReadBytes(fileobj, 4)
 		entries = []
 		for x in range(0, entrynum):
-			pos = HistLib.longstruct.unpack(fileobj.read(4))[0]
+			pos = HistLib.ReadBytes(fileobj, 4)
 			name = HistLib.ReadOString(fileobj)
 			cls = HistLib.ReadOString(fileobj)
 			entries.append((pos, name, cls))

@@ -16,20 +16,18 @@
 #
 # Launcher.py - script file for "launcher.hzh"
 
-import Engine, Element, Events, sys, HistLib
+import Engine, Element, Events, sys, HistLib, Fonts
 
 class LauncherButton(Element.Sprite):
 	def mouseout(self):
-		global helptext, helpdef
 		self.image = self.out
 		if self.helpim:
-			helptext.image = helpdef
+			Engine.currlvl.helptext.image = Engine.currlvl.helpdef
 
 	def mouseover(self):
-		global helptext
 		self.image = self.over
 		if self.helpim:
-			helptext.image = self.helpim
+			Engine.currlvl.helptext.image = self.helpim
 
 	def __init__(self, win, x, y, out, over, helpim, action):
 		self.out = Engine.theme[out]
@@ -46,17 +44,16 @@ class LauncherButton(Element.Sprite):
 					
 
 def newGame():
-	Engine.endlevel(Engine.loadLevel, ["1998.hzh"])
+	Engine.endLevel(Engine.loadLevel, ["1998.hzh"])
 
 def quitGame():
 	Engine.endLevel(sys.exit)
 
 def startLevel():
-	global helptext, helpdef
-	helpdef = Engine.theme["helpgs"]
+	Engine.currlvl.helpdef = Engine.theme["helpgs"]
 	launcherwin = Engine.wm.createWindow(478, 322)
 	launcherwin.addObj(Element.Sprite, 0, 0, "launcherbg")
-	helptext = launcherwin.addObj(Element.Sprite, 179, 93, "helpgs")
+	Engine.currlvl.helptext = launcherwin.addObj(Element.Sprite, 179, 93, "helpgs")
 	launcherwin.addObj(LauncherButton, 0, 93, "newout", "newover", "helpng", newGame)
 	launcherwin.addObj(LauncherButton, 0, 118, "contout", "contover", "helpcg", lambda: HistLib.alert("unsupported"))
 	launcherwin.addObj(LauncherButton, 0, 143, "loadout", "loadover", "helplg", lambda: HistLib.alert("unsupported"))

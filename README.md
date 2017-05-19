@@ -5,7 +5,7 @@ Currently, there is not much to see, just a half-finished launcher
 window. If you want to run it for some reason, you will need Python 2
 with the pygame_sdl2 and PIL modules.
 
-Links:
+## Links
 
 [RogueAI42 repo](https://github.com/RogueAI42/histacom-au)
 

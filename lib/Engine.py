@@ -107,7 +107,7 @@ def loadLevelCluster(clus):
 			if timeTotal >= point:
 				fun(*args)
 				callbacks.remove(point) 
-		wm.updateGame()
+		wm.update()
 		pygame_sdl2.display.update(updateRects)
 		updateRects = []	
 			
@@ -125,7 +125,7 @@ def loadLevel(loadFrom):
 	elif isinstance(loadFrom, Cluster.Cluster):
 		loadLevelCluster(loadFrom)
 	else:
-		raise HistLib.InvalidArgumentException
+		raise TypeError
 
 def endLevel(function, arguments = ()):
 	global currlvl

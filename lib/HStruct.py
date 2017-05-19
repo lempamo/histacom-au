@@ -38,7 +38,7 @@ def Enc(controller, *args):
 		return self._{1}
 
 	def _set{1}(self, val):
-		{0}.set{1}(self, val)
+		{0}._enc_set{1}(self, val)
 	
 	{1} = property(_get{1}, _set{1})
 
@@ -55,6 +55,6 @@ def Gwe(clsname, controller, *args):
 # exec(HStruct.Sts("w", "h", "x", "y"))
 def Sts(*args):
 	return "".join(["""
-def set{0}(self, obj, val):
+def _enc_set{0}(self, obj, val):
 	obj._{0} = val
 """.format(x) for x in args])

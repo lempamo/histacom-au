@@ -22,15 +22,15 @@ class Level(HistLib.Format):
 	def _LoadF(self, fobj):
 		if fobj.read(4) != "HILL":
 			raise HistLib.WrongFiletypeException("This is not a Histacom.AU level")
-		self.year = HistLib.shortstruct.unpack(fobj.read(2))[0] # year 32769 bug!
+		self.year = HistLib.ReadBytes(fobj, 2) # year 32769 bug!
 		self.wm = eval(HistLib.ReadOString(fobj))
 		self.scr = importlib.import_module(HistLib.ReadOString(fobj))
-		for x in range(0, HistLib.shortstruct.unpack(fobj.read(2))[0]):
+		for x in range(0, HistLib.ReadBytes(fobj, 2)):
 			key = HistLib.ReadOString(fobj)
 			fname = HistLib.ReadOString(fobj)
 			self.theme[key] = fname
-		for x in range(0, HistLib.shortstruct.unpack(fobj.read(2))[0]):
-			persist = bool(ord(fobj.read(1)))
+		for x in range(0, HistLib.ReadBytes(fobj, 2)):
+			persist = bool(HistLib.ReadBytes(fobj, 1))
 			name = HistLib.ReadOString(fobj)
 			self.mutables.append((name, persist))
 	def _SaveF(self, fobj):
