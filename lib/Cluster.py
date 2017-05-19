@@ -23,6 +23,7 @@ import String
 # Import every module with a class we need to save.
 
 import Level
+import Serial
 
 class Cluster(HistLib.Format):
 	def _LoadF(self, fileobj):

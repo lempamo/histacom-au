@@ -40,7 +40,7 @@ class Window(Element.BoxContainer):
 						obj.event(event)
 					break
 
-# Base class for all implementations. Derivatives should define blit().
+# Base class for all implementations.
 class Man(Element.BoxContainer):
 	def __init__(self):
 		Element.BoxContainer.__init__(self, Engine.gamewindow, 0, 0, Engine.screenWidth, Engine.screenHeight)
@@ -77,7 +77,7 @@ class Man(Element.BoxContainer):
 			obj.update()
 	
 	def blit(self, image, dest):
-		Engine.gamewindow.blit(image, dest)
+		Engine.gamewindow.blit(image, self.convertRect(dest))
 	
 	def updateRect(self, rect):
 		Engine.updateRects.append(self.convertRect(rect))
@@ -97,7 +97,10 @@ class Shim(Man):
 # probably be used in most levels.
 class Floating(Man):
 	def __init__(self):
-		Engine.currlvl.wmsettings.copy(self)
+		Engine.setResolution(Engine.screenWidth, Engine.screenHeight, pygame_sdl2.FULLSCREEN)
+		Man.__init__(self)
+		pygame_sdl2.display.set_caption(HistLib.productName)
+		self.bgcolour = None # set by startLevel()
 	def update(self):
 		if self.bgcolour:
 			Engine.gamewindow.fill(self.bgcolour)

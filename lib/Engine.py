@@ -62,7 +62,7 @@ def setResolution(width, height, flags = 0):
 	gamewindow = pygame_sdl2.display.set_mode((width, height), flags)
 	updateRects = [(0, 0, width, height)]
 
-loaders = {"graphics": lambda x: pygame_sdl2.image.load(x).convert(),
+loaders = {"graphics": lambda x: pygame_sdl2.image.load(x).convert_alpha(),
 		"sounds": pygame_sdl2.mixer.Sound,
 		"fonts": Fonts.Font}
 

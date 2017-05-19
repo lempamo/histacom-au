@@ -39,17 +39,23 @@ class Box(Element):
 			self.__dict__["_" + prop] = eval(prop)
 		
 	def setRect(self, x, y, w, h):
+		oldPos = self.pos
 		oldRect = self.rect
 		self._x = x
 		self._y = y
 		self._w = w
 		self._h = h
+		newPos = self.pos
 		newRect = self.rect
-		if oldRect != newRect:
+		if oldRect != newRect or oldPos != newPos:
 			for rect in [oldRect, newRect]:
 				self.parent.updateRect(rect)
 	
+	def setPos(self, x, y):
+		self.setRect(x, y, self.w, self.h)
+	
 	rect = property(lambda self: pygame_sdl2.Rect(self.x, self.y, self.w, self.h), lambda self, rect: self.setRect(rect.x, rect.y, rect.width, rect.height))
+	pos = property(lambda self: (self.x, self.y), lambda self, pos: self.setPos(*pos))
 	x = property(lambda self: self._x, lambda self, val: self.setRect(val, self.y, self.w, self.h))
 	y = property(lambda self: self._y, lambda self, val: self.setRect(self.x, val, self.w, self.h))
 	w = property(lambda self: self._w, lambda self, val: self.setRect(self.x, self.y, val, self.h))
