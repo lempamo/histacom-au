@@ -22,7 +22,10 @@ import HStruct
 import Paths
 import HistLib
 import Fonts
+import Options
+import SaveFile
 import os
+import sys
 
 pygame_sdl2.mixer.pre_init(44100)
 pygame_sdl2.init()
@@ -30,10 +33,9 @@ pygame_sdl2.init()
 assets = {}
 entities = []
 
-i = pygame_sdl2.display.Info()
-screenWidth = i.current_w
-screenHeight = i.current_h
-del i
+defaultMode = Options.getMode()
+(screenWidth, screenHeight, _flags) = defaultMode # split tuple for easier access
+del(_flags) # ... but we don't need that
 
 timer = pygame_sdl2.time.Clock()
 
@@ -45,6 +47,7 @@ updateRects = []
 currlvl = None
 lvlname = None
 wm = None
+savename = None
 
 timeDelta = 0
 timeTotal = 0
@@ -62,7 +65,7 @@ def setResolution(width, height, flags = 0):
 	gamewindow = pygame_sdl2.display.set_mode((width, height), flags)
 	updateRects = [(0, 0, width, height)]
 
-loaders = {"graphics": lambda x: pygame_sdl2.image.load(x).convert(),
+loaders = {"graphics": lambda x: pygame_sdl2.image.load(x).convert_alpha(),
 		"sounds": pygame_sdl2.mixer.Sound,
 		"fonts": Fonts.Font}
 
@@ -107,7 +110,7 @@ def loadLevelCluster(clus):
 			if timeTotal >= point:
 				fun(*args)
 				callbacks.remove(point) 
-		wm.updateGame()
+		wm.update()
 		pygame_sdl2.display.update(updateRects)
 		updateRects = []	
 			
@@ -125,10 +128,15 @@ def loadLevel(loadFrom):
 	elif isinstance(loadFrom, Cluster.Cluster):
 		loadLevelCluster(loadFrom)
 	else:
-		raise HistLib.InvalidArgumentException
+		raise TypeError
 
 def endLevel(function, arguments = ()):
 	global currlvl
 	currlvl.loop = False
 	currlvl.tail = function
 	currlvl.args = arguments
+
+def quitGame():
+	if savename:
+		SaveFile.SaveGame(savename)
+	endLevel(sys.exit)

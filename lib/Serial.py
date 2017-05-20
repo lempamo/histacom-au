@@ -14,23 +14,17 @@
 # You should have received a copy of the GNU General Public License
 # along with Histacom.AU.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Events.py - "constants" for WManager events
+# Serial.py - save stuff
 
-# Add new event names to this list.
-events = ["MOUSEOVER",
-		"MOUSEOUT",
-		"MOUSEDOWN",
-		"MOUSEUP"]
+import HistLib
 
-# Keyboard events.
-for act in ["UP", "DOWN"]:
-	events += ["KEY" + act + chr(x) for x in range(ord("0"), ord("9")) + range(ord("A"), ord("Z"))]
-	events += ["KEY" + act + "ESCAPE"]
-
-# Doesn't do anything, but you can compare instances of it.
-class EventID:
-	pass
-
-# Register the events listed above.
-for eventname in events:
-	exec(eventname + " = EventID()")
+class Colour(HistLib.Format):
+	def _LoadF(self, fobj):
+		self.tup = tuple([HistLib.ReadBytes(fobj, 1) for i in range(0, 4)])
+	def _SaveF(self, fobj):
+		if len(self.tup) != 4:
+			raise HistLib.UnsupportedException
+		for val in self.tup:
+			fobj.write(chr(val))
+	def _New(self):
+		self.tup = (0, 0, 0, 0)

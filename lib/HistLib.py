@@ -18,14 +18,27 @@
 
 import struct, __main__
 
-class InvalidArgumentException(Exception):
-	"""Invalid argument passed to function."""
-
 class WrongFiletypeException(Exception):
 	"""A class tried to load from an invalid file."""
 
 class UnsupportedException(Exception):
-	"""A file contained an unsupported property."""
+	"""Unsupported features."""
+
+# Store two- and four-byte unsigned integers in binary files.
+shortstruct = struct.Struct("<H")
+longstruct = struct.Struct("<L")
+
+# Fix struct.unpack's ugly syntax.
+def reader(structobj):
+	return lambda x: structobj.unpack(x)[0]
+
+readers = {1: ord, 2: reader(shortstruct), 4: reader(longstruct)}
+
+def ReadBytes(fobj, num):
+	if num in readers:
+		return readers[num](fobj.read(num))
+	else:
+		raise TypeError
 
 # Generator to split an iterable into chunks of equal size.
 def Chunks(l, n):
@@ -47,7 +60,7 @@ def WriteCString(myFile, myString):
 
 # Read an "O String" from a file (1-byte length int followed by data).
 def ReadOString(myFile):
-	return myFile.read(ord(myFile.read(1)))
+	return myFile.read(ReadBytes(myFile, 1))
 
 # Write an "O String" to a file.
 def WriteOString(myFile, myString):
@@ -75,7 +88,7 @@ class Format(saneobject):
 		elif isinstance(argument, file):
 			return self._LoadF(argument)
 		else:
-			raise InvalidArgumentException
+			raise TypeError
 	
 	def _SaveStr(self, filename):
 		with open(filename, "wb") as myFile:
@@ -87,7 +100,7 @@ class Format(saneobject):
 		elif isinstance(argument, file):
 			return self._SaveF(argument)
 		else:
-			raise InvalidArgumentException
+			raise TypeError
 	
 	def __init__(self, loadFrom = None):
 		self._New()
@@ -102,6 +115,3 @@ try:
 except:
 	pass
 
-# Store two- and four-byte unsigned integers in binary files.
-longstruct = struct.Struct("<L")
-shortstruct = struct.Struct("<H")

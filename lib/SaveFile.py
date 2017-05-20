@@ -22,7 +22,7 @@ class SaveFile(HistLib.Format):
 	def _LoadF(self, fobj):
 		if fobj.read(4) != "Save":
 			raise HistLib.WrongFiletypeException("This is not a Histacom.AU save file")
-		self.year = HistLib.shortstruct.unpack(fobj.read(2))[0]
+		self.year = HistLib.ReadBytes(fobj, 2)
 		self.level = HistLib.ReadOString(fobj)
 		self.fobj = fobj # read the cluster later
 	def _SaveF(self, fobj):
@@ -36,7 +36,7 @@ class SaveFile(HistLib.Format):
 		self.cluster = None
 		self.fobj = None
 	def getcluster(self):
-		if not self.cluster
+		if not self.cluster:
 			self.cluster = Cluster.Cluster(self.fobj)
 		return self.cluster
 	cluster = property(getcluster)
@@ -47,9 +47,10 @@ def LoadGame(loadfrom):
 	elif isinstance(loadfrom, SaveFile):
 		save = loadfrom
 	else:
-		raise HistLib.InvalidArgumentException
+		raise TypeError
 	level = Cluster.Cluster(Engine.getLevel(fname))
 	level.Load(save.fobj)
+	save.fobj.close()
 	Engine.lvlname = save.level
 	Engine.loadLevel(level)
 

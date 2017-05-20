@@ -14,23 +14,14 @@
 # You should have received a copy of the GNU General Public License
 # along with Histacom.AU.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Events.py - "constants" for WManager events
+# Cursor.py - do I have to spell it out?
 
-# Add new event names to this list.
-events = ["MOUSEOVER",
-		"MOUSEOUT",
-		"MOUSEDOWN",
-		"MOUSEUP"]
+import Engine, Element, pygame_sdl2
 
-# Keyboard events.
-for act in ["UP", "DOWN"]:
-	events += ["KEY" + act + chr(x) for x in range(ord("0"), ord("9")) + range(ord("A"), ord("Z"))]
-	events += ["KEY" + act + "ESCAPE"]
-
-# Doesn't do anything, but you can compare instances of it.
-class EventID:
-	pass
-
-# Register the events listed above.
-for eventname in events:
-	exec(eventname + " = EventID()")
+class Cursor(Element.Sprite):
+	def __init__(self, win):
+		Element.Sprite.__init__(self, win, 0, 0, "cursor pointer")
+		pygame_sdl2.mouse.set_visible(False)
+	def update(self):
+		self.pos = Engine.mousepos
+		Element.Sprite.update(self)

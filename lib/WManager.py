@@ -16,18 +16,21 @@
 #
 # WManager.py - Window manager implementations
 
-import Engine, HStruct, Events, Element, HistLib
+import Engine, Events, Element, HistLib
 import pygame_sdl2
 
 # Window class
-exec(HStruct.Gwe("Window", "Engine.wm", "w", "h", "x", "y", "objs", "hover", "events") + """
+class Window(Element.BoxContainer):
+	def __init__(self, parent, x, y, w, h):
+		Element.BoxContainer.__init__(self, parent, x, y, w, h)
+		self.hover = None
 	def mouse(self, x, y, event):
 		if event in self.events:
 			self.events[event]()
 		else:
 			rel = (x - self.x, y - self.y)
 			for obj in reversed(self.objs):
-				if isinstance(obj, Element.Sprite) and obj.rect.collidepoint(rel):
+				if hasattr(obj, "rect") and obj.rect.collidepoint(rel):
 					if self.hover != obj:
 						if self.hover:
 							self.hover.event(Events.MOUSEOUT)
@@ -36,33 +39,24 @@ exec(HStruct.Gwe("Window", "Engine.wm", "w", "h", "x", "y", "objs", "hover", "ev
 					if event:
 						obj.event(event)
 					break
-	def update(self):
-		for obj in self.objs:
-			obj.update()
-	def blit(self, image, x, y):
-		Engine.wm.blit(self, image, x, y)
-	def addObj(self, cls, *args):
-		obj = cls(*(self,) + args)
-		self.objs.append(obj)
-		return obj
-	rect = property(lambda self: pygame_sdl2.Rect(self.x, self.y, self.w, self.h))
-""")
 
-# Base class for all implementations. Derivatives should define blit()
-# and updateGame().
-class Man:
+# Base class for all implementations.
+class Man(Element.BoxContainer):
 	def __init__(self):
-		self.windows = []
+		Element.BoxContainer.__init__(self, Engine.gamewindow, 0, 0, Engine.screenWidth, Engine.screenHeight)
 	
 	def createWindow(self, w, h, x = -1, y = -1):
-		win = Window(w, h, x, y, [], None, [])
-		self.windows.append(win)
-		return win
+		for (c, s) in [("x", "w"), ("y", "h")]:
+			exec("""if {0} < 0:
+	{0} = int(round(self.{1} / 2 - {1} / 2))""".format(c, s))
+		return self.addObj(Window, x, y, w, h)
 	
-	def getEvent(self):
+	def getEvent(self): # FIXME, needs a lot of work
 		hevent = None
 		for pyevent in Engine.events:
-			if pyevent.type == pygame_sdl2.MOUSEBUTTONUP:
+			if pyevent.type == pygame_sdl2.QUIT:
+				Engine.quitGame()
+			elif pyevent.type == pygame_sdl2.MOUSEBUTTONUP:
 				hevent = Events.MOUSEUP
 			elif pyevent.type == pygame_sdl2.KEYDOWN or pyevent.type == pygame_sdl2.KEYUP:
 				tmp = "KEY"
@@ -70,36 +64,46 @@ class Man:
 					tmp += "DOWN"
 				else:
 					tmp += "UP"
-				tmp += pygame_sdl2.key.name(pyevent.key)
+				tmp += pygame_sdl2.key.name(pyevent.key).upper()
 				if tmp in Events.events:
 					hevent = eval("Events." + tmp)
 				del tmp
 		return hevent
 	
-	exec(HStruct.Sts("w", "h", "x", "y", "objs", "hover", "events"))
+	def update(self):
+		hevent = self.getEvent()
+		for obj in self.objs:
+			if isinstance(obj, Window):
+				if obj.rect.collidepoint(Engine.mousepos):
+					obj.mouse(*Engine.mousepos + (hevent,))
+			obj.update()
+	
+	def blit(self, image, dest):
+		Engine.gamewindow.blit(image, self.convertRect(dest))
+	
+	def updateRect(self, rect):
+		Engine.updateRects.append(self.convertRect(rect))
 
 # Used for the launcher. Does not actually manage windows.
 class Shim(Man):
 	def __init__(self):
-		Man.__init__(self)
 		Engine.setResolution(478, 322)
+		Man.__init__(self)
 		pygame_sdl2.display.set_caption("Welcome to " + HistLib.productName)
 	
 	def createWindow(self, w, h, x = -1, y = -1):
 		Engine.setResolution(w, h)
 		return Man.createWindow(self, w, h, 0, 0)
-	
-	def blit(self, window, image, x, y):
-		Engine.gamewindow.blit(image, (x, y))
-	
-	def updateGame(self):
-		hevent = self.getEvent()
-		for win in self.windows:
-			if win.rect.collidepoint(Engine.mousepos):
-				win.mouse(*Engine.mousepos + (hevent,))
-			win.update()
 
 # Standard floating window manager. This or a derivative of it will
 # probably be used in most levels.
 class Floating(Man):
-	pass
+	def __init__(self):
+		Engine.setResolution(*Engine.defaultMode)
+		Man.__init__(self)
+		pygame_sdl2.display.set_caption(HistLib.productName)
+		self.bgcolour = None # set by startLevel()
+	def update(self):
+		if self.bgcolour:
+			Engine.gamewindow.fill(self.bgcolour)
+		Man.update(self)

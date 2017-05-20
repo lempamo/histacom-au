@@ -14,10 +14,89 @@
 # You should have received a copy of the GNU General Public License
 # along with Histacom.AU.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Fonts.py - wrapper for pygame fonts to make them less annoying
+# Fonts.py - font-related classes
 
-import HStruct, HistLib, pygame_sdl2, cStringIO
+import HStruct, HistLib, InterOp, PIL.Image, pygame_sdl2, cStringIO
 
+# A bitmap font format which behaves similarly to pygame.font.Font.
+# This is not a HistLib.Format and cannot be saved by the game engine.
+class HFont(HistLib.saneobject):
+	# default character (for height calculations and missing characters)
+	_dchar = property(lambda self: self._characters[" "])
+	
+	def _getchar(self, char):
+		if char in self._characters:
+			return self._characters[char]
+		else:
+			return self._dchar
+	
+	def _getcolour(self, colour):
+		if colour in self._colours:
+			return self._colours[colour]
+		im = self._image
+		if len(colour) != 3:
+			raise TypeError
+		entry = "".join(chr(x) for x in colour) # stringify RGB tuple
+		im.palette = im.palette[:3] + entry # replace index 1
+		surf = im.surface
+		self._colours[colour] = surf
+		return surf
+	
+	def size(self, text):
+		h = self._dchar.height # HFonts should be fixed height
+		w = 0
+		for char in text:
+			w += self._getchar(char).width
+		return (w, h)
+	
+	def render(self, text, aa, colour, bg = None): # aa is ignored
+		src = self._getcolour(colour)
+		dest = pygame_sdl2.Surface(self.size(text))
+		if bg:
+			dest.fill(bg)
+		p = 0
+		for char in text:
+			rect = self._getchar(char)
+			dest.blit(src, (p, 0), rect)
+			p += rect.width
+		return dest
+	
+	def _LoadF(self, fobj):
+		if fobj.read(4) != "Font":
+			raise HistLib.WrongFiletypeException("This is not a Histacom.AU Bitmap Font")
+		
+		self._characters = {}
+		
+		# Read image file
+		imsize = HistLib.ReadBytes(fobj, 4)
+		image = cStringIO.StringIO(HistLib.read(imsize))
+		self._image = PIL.Image.open(image)
+		self._image.load()
+		image.close()
+		self._colours = {}
+		
+		# Read spritesheet table
+		startentry = HistLib.ReadBytes(fobj, 2)
+		endentry = HistLib.ReadBytes(fobj, 2)
+		for i in range(startentry, endentry):
+			for t in ["x", "y", "w", "h"]:
+				locals()[t] = HistLib.ReadBytes(fobj, 2)
+			self._characters[chr(i + 1)] = pygame_sdl2.Rect(x, y, w, h)
+	
+	def _LoadStr(self, fname):
+		with open(fname, "rb") as f:
+			self._LoadF(f)
+	
+	def __init__(self, loadFrom, size = None): # size is ignored
+		if isinstance(loadFrom, str):
+			return self._LoadStr(loadFrom)
+		elif isinstance(loadFrom, file):
+			return self._LoadF(loadFrom)
+		else:
+			raise TypeError
+
+# A dynamic dictionary of pygame vector fonts. The key is the size.
+# You can load a font file once and then get multiple sizes of it.
 class Font(HistLib.saneobject):
 	def __init__(self, fname):
 		with open(fname) as f:

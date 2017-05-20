@@ -14,23 +14,23 @@
 # You should have received a copy of the GNU General Public License
 # along with Histacom.AU.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Events.py - "constants" for WManager events
+# InterOp.py - a series of tubes
 
-# Add new event names to this list.
-events = ["MOUSEOVER",
-		"MOUSEOUT",
-		"MOUSEDOWN",
-		"MOUSEUP"]
+# This is a special module - there is nothing public in its namespace
+# and it modifies the namespaces of other modules when you import it.
+# The idea is to make third party modules work together in an intuitive
+# way even though they don't know anything about one another.
 
-# Keyboard events.
-for act in ["UP", "DOWN"]:
-	events += ["KEY" + act + chr(x) for x in range(ord("0"), ord("9")) + range(ord("A"), ord("Z"))]
-	events += ["KEY" + act + "ESCAPE"]
+import PIL.Image, pygame_sdl2, cStringIO
 
-# Doesn't do anything, but you can compare instances of it.
-class EventID:
-	pass
+# Extension of PIL.Image to enable it to interface with pygame_sdl2
+def _ImageToSurface(self):
+	o = cStringIO.StringIO()
+	self.save(o, "png")
+	i = cStringIO.StringIO(o.getvalue())
+	o.close()
+	s = pygame_sdl2.image.load(i).convert()
+	i.close()
+	return s
 
-# Register the events listed above.
-for eventname in events:
-	exec(eventname + " = EventID()")
+PIL.Image.Image.surface = property(_ImageToSurface)

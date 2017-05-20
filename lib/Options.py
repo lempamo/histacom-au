@@ -14,23 +14,23 @@
 # You should have received a copy of the GNU General Public License
 # along with Histacom.AU.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Events.py - "constants" for WManager events
+# Options.py - command-line options
 
-# Add new event names to this list.
-events = ["MOUSEOVER",
-		"MOUSEOUT",
-		"MOUSEDOWN",
-		"MOUSEUP"]
+import __main__, pygame_sdl2, Engine, HistLib
 
-# Keyboard events.
-for act in ["UP", "DOWN"]:
-	events += ["KEY" + act + chr(x) for x in range(ord("0"), ord("9")) + range(ord("A"), ord("Z"))]
-	events += ["KEY" + act + "ESCAPE"]
+def getMode():
+	i = pygame_sdl2.display.Info()
+	width = i.current_w
+	height = i.current_h
+	flags = pygame_sdl2.FULLSCREEN
+	if hasattr(__main__, "args"):
+		requestedWidth = int(__main__.args.width[0])
+		requestedHeight = int(__main__.args.height[0])
+		if __main__.args.windowed:
+			flags = 0
+		if requestedWidth > 0:
+			width = requestedWidth
+		if requestedHeight > 0:
+			height = requestedHeight
+	return (width, height, flags)
 
-# Doesn't do anything, but you can compare instances of it.
-class EventID:
-	pass
-
-# Register the events listed above.
-for eventname in events:
-	exec(eventname + " = EventID()")

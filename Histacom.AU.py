@@ -88,8 +88,6 @@ def exception(exctype, value, trace):
 
 sys.excepthook = exception
 
-sys.path.insert(0, "lib")
-
 import distutils.spawn
 
 # Make sure we're running Python 2 and not that inferior successor.
@@ -141,6 +139,16 @@ if sys.version_info[0] != 2:
 	os.execv(command, arguments)
 
 # We are now guaranteed to be running under Python 2.
+
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-w", "--windowed", action = "store_const", const = True, default = False)
+parser.add_argument("-W", "--width", nargs = 1, default = [-1])
+parser.add_argument("-H", "--height", nargs = 1, default = [-1])
+args = parser.parse_args()
+
+sys.path.insert(0, "lib")
 
 import Paths
 

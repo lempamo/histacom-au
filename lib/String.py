@@ -29,7 +29,7 @@ class BString(HistLib.Format):
 		elif isinstance(argument, file):
 			return self._LoadF(argument)
 		else:
-			raise InvalidArgumentException
+			raise TypeError
 	def __str__(self):
 		return self.pystr
 
