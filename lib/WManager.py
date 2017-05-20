@@ -97,7 +97,7 @@ class Shim(Man):
 # probably be used in most levels.
 class Floating(Man):
 	def __init__(self):
-		Engine.setResolution(Engine.screenWidth, Engine.screenHeight, pygame_sdl2.FULLSCREEN)
+		Engine.setResolution(*Engine.defaultMode)
 		Man.__init__(self)
 		pygame_sdl2.display.set_caption(HistLib.productName)
 		self.bgcolour = None # set by startLevel()

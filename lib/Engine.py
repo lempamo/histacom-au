@@ -22,6 +22,7 @@ import HStruct
 import Paths
 import HistLib
 import Fonts
+import Options
 import os
 
 pygame_sdl2.mixer.pre_init(44100)
@@ -30,10 +31,9 @@ pygame_sdl2.init()
 assets = {}
 entities = []
 
-i = pygame_sdl2.display.Info()
-screenWidth = i.current_w
-screenHeight = i.current_h
-del i
+defaultMode = Options.getMode()
+(screenWidth, screenHeight, _flags) = defaultMode # split tuple for easier access
+del(_flags) # ... but we don't need that
 
 timer = pygame_sdl2.time.Clock()
 

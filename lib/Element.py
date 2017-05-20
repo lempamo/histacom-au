@@ -19,6 +19,14 @@
 import Engine, HistLib, WordWrap, HStruct
 import pygame_sdl2
 
+# Checks if two Pygame Rects have the same position and size.
+# The equality operator doesn't seem to work for this.
+def sameRect(r1, r2):
+	for attr in ["x", "y", "width", "height"]:
+		if getattr(r1, attr) != getattr(r2, attr):
+			return False
+	return True
+
 # Derivatives should define update().
 class Element(HistLib.saneobject):
 	def __init__(self):
@@ -39,15 +47,13 @@ class Box(Element):
 			self.__dict__["_" + prop] = eval(prop)
 		
 	def setRect(self, x, y, w, h):
-		oldPos = self.pos
 		oldRect = self.rect
 		self._x = x
 		self._y = y
 		self._w = w
 		self._h = h
-		newPos = self.pos
 		newRect = self.rect
-		if oldRect != newRect or oldPos != newPos:
+		if not sameRect(oldRect, newRect):
 			for rect in [oldRect, newRect]:
 				self.parent.updateRect(rect)
 	
