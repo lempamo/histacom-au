@@ -144,8 +144,8 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-w", "--windowed", action = "store_const", const = True, default = False)
-parser.add_argument("-W", "--width", nargs = 1, default = -1)
-parser.add_argument("-H", "--height", nargs = 1, default = -1)
+parser.add_argument("-W", "--width", nargs = 1, default = [-1])
+parser.add_argument("-H", "--height", nargs = 1, default = [-1])
 args = parser.parse_args()
 
 sys.path.insert(0, "lib")
