@@ -36,7 +36,7 @@ class SaveFile(HistLib.Format):
 		self.cluster = None
 		self.fobj = None
 	def getcluster(self):
-		if not self.cluster
+		if not self.cluster:
 			self.cluster = Cluster.Cluster(self.fobj)
 		return self.cluster
 	cluster = property(getcluster)

@@ -22,16 +22,18 @@ def getMode():
 	i = pygame_sdl2.display.Info()
 	screenWidth = i.current_w
 	screenHeight = i.current_h
+	requestedWidth = int(__main__.args.width[0])
+	requestedHeight = int(__main__.args.height[0])
 	if __main__.args.windowed:
 		flags = 0
 	else:
 		flags = pygame_sdl2.FULLSCREEN
-	if __main__.args.width > 0:
-		width = int(__main__.args.width[0])
+	if requestedWidth > 0:
+		width = requestedWidth
 	else:
 		width = screenWidth
-	if __main__.args.height > 0:
-		height = int(__main__.args.height[0])
+	if requestedHeight > 0:
+		height = requestedHeight
 	else:
 		height = screenHeight
 	return (width, height, flags)

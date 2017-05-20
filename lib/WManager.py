@@ -54,7 +54,9 @@ class Man(Element.BoxContainer):
 	def getEvent(self): # FIXME, needs a lot of work
 		hevent = None
 		for pyevent in Engine.events:
-			if pyevent.type == pygame_sdl2.MOUSEBUTTONUP:
+			if pyevent.type == pygame_sdl2.QUIT:
+				Engine.quitGame()
+			elif pyevent.type == pygame_sdl2.MOUSEBUTTONUP:
 				hevent = Events.MOUSEUP
 			elif pyevent.type == pygame_sdl2.KEYDOWN or pyevent.type == pygame_sdl2.KEYUP:
 				tmp = "KEY"

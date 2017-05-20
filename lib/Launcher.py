@@ -46,9 +46,6 @@ class LauncherButton(Element.Sprite):
 def newGame():
 	Engine.endLevel(Engine.loadLevel, ["1998.hzh"])
 
-def quitGame():
-	Engine.endLevel(sys.exit)
-
 def startLevel():
 	Engine.currlvl.helpdef = Engine.theme["helpgs"]
 	launcherwin = Engine.wm.createWindow(478, 322)
@@ -57,5 +54,5 @@ def startLevel():
 	launcherwin.addObj(LauncherButton, 0, 93, "newout", "newover", "helpng", newGame)
 	launcherwin.addObj(LauncherButton, 0, 118, "contout", "contover", "helpcg", lambda: HistLib.alert("unsupported"))
 	launcherwin.addObj(LauncherButton, 0, 143, "loadout", "loadover", "helplg", lambda: HistLib.alert("unsupported"))
-	launcherwin.addObj(LauncherButton, 427, 293, "exitout", "exitover", None, quitGame)
-	launcherwin.events = {Events.KEYDOWNN: newGame, Events.KEYDOWNE: quitGame}
+	launcherwin.addObj(LauncherButton, 427, 293, "exitout", "exitover", None, Engine.quitGame)
+	launcherwin.events = {Events.KEYDOWNN: newGame, Events.KEYDOWNE: Engine.quitGame}

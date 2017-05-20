@@ -23,7 +23,9 @@ import Paths
 import HistLib
 import Fonts
 import Options
+import SaveFile
 import os
+import sys
 
 pygame_sdl2.mixer.pre_init(44100)
 pygame_sdl2.init()
@@ -45,6 +47,7 @@ updateRects = []
 currlvl = None
 lvlname = None
 wm = None
+savename = None
 
 timeDelta = 0
 timeTotal = 0
@@ -132,3 +135,8 @@ def endLevel(function, arguments = ()):
 	currlvl.loop = False
 	currlvl.tail = function
 	currlvl.args = arguments
+
+def quitGame():
+	if savename:
+		SaveFile.SaveGame(savename)
+	endLevel(sys.exit)
