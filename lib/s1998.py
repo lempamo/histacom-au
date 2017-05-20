@@ -14,23 +14,11 @@
 # You should have received a copy of the GNU General Public License
 # along with Histacom.AU.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Options.py - command-line options
+# s1998.py - script file for "1998.hzh"
 
-import __main__, pygame_sdl2, Engine, HistLib
+import Engine, Cursor
 
-def getMode():
-	i = pygame_sdl2.display.Info()
-	width = i.current_w
-	height = i.current_h
-	flags = pygame_sdl2.FULLSCREEN
-	if hasattr(__main__, "args"):
-		requestedWidth = int(__main__.args.width[0])
-		requestedHeight = int(__main__.args.height[0])
-		if __main__.args.windowed:
-			flags = 0
-		if requestedWidth > 0:
-			width = requestedWidth
-		if requestedHeight > 0:
-			height = requestedHeight
-	return (width, height, flags)
-
+def startLevel():
+	Engine.wm.addObj(Cursor.Cursor)
+	Engine.wm.bgcolour = Engine.currlvl.bgcolour.tup
+	Engine.theme["startup"].play()
