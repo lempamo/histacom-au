@@ -34,11 +34,19 @@ def reader(structobj):
 
 readers = {1: ord, 2: reader(shortstruct), 4: reader(longstruct)}
 
+# Read an integer num bytes wide from fobj.
 def ReadBytes(fobj, num):
 	if num in readers:
 		return readers[num](fobj.read(num))
 	else:
 		raise TypeError
+
+# Get bit i of num as a bool.
+def GetBit(num, i):
+	mask = 0b10000000 >> i
+	masked = num & mask
+	bit = masked >> (7 - i)
+	return bool(bit)
 
 # Generator to split an iterable into chunks of equal size.
 def Chunks(l, n):
