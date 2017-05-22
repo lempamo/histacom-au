@@ -27,17 +27,21 @@ class UnsupportedException(Exception):
 # Store two- and four-byte unsigned integers in binary files.
 shortstruct = struct.Struct("<H")
 longstruct = struct.Struct("<L")
+signedshortstruct = struct.Struct("<h")
 
 # Fix struct.unpack's ugly syntax.
-def reader(structobj):
+def Reader(structobj):
 	return lambda x: structobj.unpack(x)[0]
 
-readers = {1: ord, 2: reader(shortstruct), 4: reader(longstruct)}
+readers = {(1, False): ord,
+		(2, False): Reader(shortstruct),
+		(2, True): Reader(signedshortstruct),
+		(4, False): Reader(longstruct)}
 
 # Read an integer num bytes wide from fobj.
-def ReadBytes(fobj, num):
-	if num in readers:
-		return readers[num](fobj.read(num))
+def ReadBytes(fobj, num, signed = False):
+	if (num, signed) in readers:
+		return readers[(num, signed)](fobj.read(num))
 	else:
 		raise TypeError
 
