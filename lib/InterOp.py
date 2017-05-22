@@ -29,7 +29,7 @@ def _ImageToSurface(self):
 	self.save(o, "png")
 	i = cStringIO.StringIO(o.getvalue())
 	o.close()
-	s = pygame_sdl2.image.load(i).convert()
+	s = pygame_sdl2.image.load(i).convert_alpha()
 	i.close()
 	return s
 
