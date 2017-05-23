@@ -31,13 +31,14 @@ def wrap(font, text, aa, colour, w, spacing = 0):
 	rows = []
 	while text:
 		i = 1
-		while font.size(text[:i])[0] > w and i < len(text):
+		while font.size(text[:i])[0] < w and i < len(text):
 			i += 1
-		if i > len(text): # if wrapped...
+		if i < len(text): # if wrapped...
 			i = text.rfind(" ", 0, i) + 1 # find last space before cursor
 		rows.append(font.render(text[:i], aa, colour))
 		h += lh
-	out = pygame_sdl2.Surface((w, h))
+		text = text[i:]
+	out = pygame_sdl2.Surface((w, h), pygame_sdl2.SRCALPHA)
 	y = 0
 	for row in rows:
 		out.blit(row, (0, y))
