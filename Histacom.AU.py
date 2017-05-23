@@ -162,7 +162,7 @@ for fn in files:
 		for line in open(os.path.join(Paths.lib, fn)).read().splitlines():
 			# Remove irrelevant whitespace.
 			line = line.strip()
-			if line.startswith("import"):
+			if line.startswith("import "):
 				# Remove "import" and whitespace. Split by ",".
 				for mod in " ".join(line.split()[1:]).split(","):
 					# Get the actual module imported by "as" imports.
