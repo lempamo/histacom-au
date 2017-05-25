@@ -18,22 +18,9 @@
 
 import HistLib, WeakDict, cStringIO, os
 
-# A segment of text with flags.
-# RTFParser.parse returns a list of lists (paragraphs) of lists (lines)
-# of these. The parser has an internal state which gets copied to each
-# text block once it is reached.
-class Text(HistLib.saneobject):
-	def __init__(self, text, state):
-		self.text = text
-		self.state = WeakDict.WeakDict(state)
-	def __str__(self):
-		return self.text
-	def __repr__(self): # for testing
-		return "{0} ({1})".format(self.text, self.state)
-
 class RTFParser(HistLib.saneobject):
 	def __init__(self):
-		self.state = WeakDict.WeakDict()
+		self.state = WeakDict.WeakDict(False)()
 	
 	def _bool(self, (cmd, parameter)):
 		self.state[cmd] = (parameter != 0)
@@ -67,6 +54,42 @@ class RTFParser(HistLib.saneobject):
 				raise SyntaxError("{ without matching } in RTF data")
 			else:
 				obj += byte
+	
+	def _readParam(self, fobj, st):
+		parameter = st
+		while True:
+			char = fobj.read(1)
+			if char == "":
+				break
+			elif char.isdigit():
+				parameter += char
+			elif not char.isalnum():
+				if char != " ":
+					fobj.seek(-1, os.SEEK_CUR) # interpret again
+				break
+		return int(parameter)
+	
+	def _readCommand(self, fobj):
+		cmd = ""
+		parameter = None
+		while True:
+			char = fobj.read(1)
+			if char == "":
+				break
+			elif char.islower():
+				cmd += char
+			else:
+				if cmd == "":
+					if char == "\\":
+						self.data += "\\" # literal backslash
+					else:
+						cmd = char # command symbol
+				elif char.isdigit() or char == "-": # parameter
+					parameter = self._readParam(fobj, char)
+				elif char != " ":
+					fobj.seek(-1, os.SEEK_CUR)
+				break
+		return (cmd, parameter)
 
 	def _readControl(self, group):
 		out = []
@@ -74,52 +97,23 @@ class RTFParser(HistLib.saneobject):
 			if isinstance(obj, list):
 				out.append(self._readControl(obj))
 			else: # string
-				data = ""
+				self.data = ""
 				fobj = cStringIO.StringIO(obj)
 				while True:
 					char = fobj.read(1)
 					if char == "":
 						break
 					elif char == "\\": # start of command string
-						cmd = ""
-						parameter = None
-						while True:
-							char = fobj.read(1)
-							if char == "":
-								break
-							elif char.islower():
-								cmd += char
-							else:
-								if cmd == "":
-									if char == "\\":
-										data += "\\" # literal backslash
-									else:
-										cmd = char # command symbol
-								elif char.isdigit() or char == "-": # parameter
-									parameter = char
-									while True:
-										char = fobj.read(1)
-										if char == "":
-											break
-										elif char.isdigit():
-											parameter += char
-										elif not char.isalnum():
-											if char != " ":
-												fobj.seek(-1, os.SEEK_CUR) # interpret again
-											break
-									parameter = int(parameter)
-								elif char != " ":
-									fobj.seek(-1, os.SEEK_CUR)
-								break
+						(cmd, parameter) = self._readCommand(fobj)
 						if cmd != "":
-							if data != "":
-								out.append(data)
-								data = ""
+							if self.data != "":
+								out.append(self.data)
+								self.data = ""
 							out.append((cmd, parameter))
 					else: # data
-						data += char
-				if data != "":
-					out.append(data)
+						self.data += char
+				if self.data != "":
+					out.append(self.data)
 		return out
 
 	def _runCommands(self, src):
@@ -153,7 +147,7 @@ class RTFParser(HistLib.saneobject):
 		if len(para) > 0:
 			output.append(para)
 		
-		self.state = WeakDict.WeakDict() # reset
+		self.state = WeakDict.WeakDict(False)() # reset
 		
 		return output
 		

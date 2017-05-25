@@ -1,0 +1,11 @@
+{
+"gs":		("Getting Started",
+"""Move the mouse over any of the options to the left
+to find out what they do. Click on one to select it."""),
+"nghelp":	("New Game", "Start Histacom.AU from the beginning."),
+"cghelp":	("Continue Game",
+"Continue Histacom.AU from where you left off."),
+"lghelp":	("Load Game",
+"""Enter a code to continue Histacom.AU
+from the last time you time travelled."""),
+}

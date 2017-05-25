@@ -41,9 +41,9 @@ class Window(Element.BoxContainer):
 					break
 
 # Base class for all implementations.
-class Man(Element.BoxContainer):
+class Man(Element.Container):
 	def __init__(self):
-		Element.BoxContainer.__init__(self, Engine.gamewindow, 0, 0, Engine.screenWidth, Engine.screenHeight)
+		Element.Container.__init__(self)
 	
 	def createWindow(self, w, h, x = -1, y = -1):
 		for (c, s) in [("x", "w"), ("y", "h")]:
@@ -78,11 +78,14 @@ class Man(Element.BoxContainer):
 					obj.mouse(*Engine.mousepos + (hevent,))
 			obj.update()
 	
+	def fill(self, colour, dest):
+		Engine.gamewindow.fill(colour, dest)
+	
 	def blit(self, image, dest):
-		Engine.gamewindow.blit(image, self.convertRect(dest))
+		Engine.gamewindow.blit(image, dest)
 	
 	def updateRect(self, rect):
-		Engine.updateRects.append(self.convertRect(rect))
+		Engine.updateRects.append(rect)
 
 # Used for the launcher. Does not actually manage windows.
 class Shim(Man):

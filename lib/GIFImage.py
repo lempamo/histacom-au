@@ -14,14 +14,17 @@
 # You should have received a copy of the GNU General Public License
 # along with Histacom.AU.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Cursor.py - do I have to spell it out?
+# GIFImage.py - load a GIF image into a list of (im, dur) tuples
 
-import Engine, Element, pygame_sdl2
+import Element, InterOp, PIL.Image
 
-class Cursor(Element.Sprite):
-	def __init__(self, win):
-		Element.Sprite.__init__(self, win, 0, 0, Engine.theme["cursor pointer"])
-		pygame_sdl2.mouse.set_visible(False)
-	def update(self):
-		self.pos = Engine.mousepos
-		Element.Sprite.update(self)
+def LoadGIF(loadFrom):
+	images = []
+	dur = 0
+	gif = PIL.Image.open(loadFrom)
+	for i in range(0, gif.n_frames):
+		gif.seek(i)
+		if "duration" in gif.info:
+			dur = gif.info["duration"]
+		images.append((gif.surface, dur))
+	return images

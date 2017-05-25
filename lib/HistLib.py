@@ -52,6 +52,13 @@ def GetBit(num, i):
 	bit = masked >> (7 - i)
 	return bool(bit)
 
+# Set bit i of num to truthiness of val. Returns the new num.
+def SetBit(num, i, val):
+	if GetBit(num, i) == bool(val):
+		return num
+	else:
+		return num ^ (1 << (7 - i))
+
 # Generator to split an iterable into chunks of equal size.
 def Chunks(l, n):
 	for i in range(0, len(l), n):
@@ -63,6 +70,9 @@ def ReadCString(myFile):
 	while True:
 		byte = myFile.read(1)
 		if byte == "\0":
+			return myString
+		elif byte == "":
+			print("warning: reached EOF with no terminator while reading C String")
 			return myString
 		myString += byte
 

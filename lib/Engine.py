@@ -24,6 +24,7 @@ import HistLib
 import Fonts
 import Options
 import SaveFile
+import Expr
 import os
 import sys
 
@@ -67,7 +68,10 @@ def setResolution(width, height, flags = 0):
 
 loaders = {"graphics": lambda x: pygame_sdl2.image.load(x).convert_alpha(),
 		"sounds": pygame_sdl2.mixer.Sound,
-		"fonts": Fonts.Font}
+		"fonts": Fonts.PFont,
+		"bmfonts": Fonts.BMFont,
+		"families": Fonts.LoadFamily,
+		"expressions": Expr.Get}
 
 def loadResource(fname):
 	name = os.path.join(Paths.assets, fname)

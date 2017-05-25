@@ -14,12 +14,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Histacom.AU.  If not, see <http://www.gnu.org/licenses/>.
 #
-# WeakDict.py - a dict that initialises non-existent keys to None when
-# you try to access them, rather than raising KeyError
+# WeakDict.py - a dict that initialises non-existent keys to a default
+# value when you try to access them, rather than raising KeyError.
 
-class WeakDict(dict):
-	def __getitem__(self, key):
-		if key not in self:
-			self[key] = None
-		return dict.__getitem__(self, key)
+def WeakDict(default):
+	class WD(dict):
+		def __getitem__(self, key):
+			return dict.setdefault(self, key, default)
+	return WD
 

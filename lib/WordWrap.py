@@ -20,7 +20,8 @@ import pygame_sdl2
 
 # Returns a Surface with text rendered at the specified colour with
 # lines never running past "w".
-def wrap(font, text, aa, colour, w, spacing = 0):
+def wrap(font, text, aa, colour, w, maxh = -1, spacing = 0, ul = False):
+	font.set_underline(ul)
 	if w < 0:
 		# If w is negative, we don't need to wrap. This does not
 		# meaningfully affect the result, but should speed things up a
@@ -30,13 +31,15 @@ def wrap(font, text, aa, colour, w, spacing = 0):
 	h = 0
 	rows = []
 	while text:
+		h += lh
+		if h > maxh > 0:
+			break
 		i = 1
 		while font.size(text[:i])[0] < w and i < len(text):
 			i += 1
 		if i < len(text): # if wrapped...
 			i = text.rfind(" ", 0, i) + 1 # find last space before cursor
 		rows.append(font.render(text[:i], aa, colour))
-		h += lh
 		text = text[i:]
 	out = pygame_sdl2.Surface((w, h), pygame_sdl2.SRCALPHA)
 	y = 0

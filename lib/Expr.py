@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2017 Declan Hoare
 # This file is part of Histacom.AU.
 #
@@ -14,14 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Histacom.AU.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Cursor.py - do I have to spell it out?
+# Expr.py - run eval on text files
 
-import Engine, Element, pygame_sdl2
-
-class Cursor(Element.Sprite):
-	def __init__(self, win):
-		Element.Sprite.__init__(self, win, 0, 0, Engine.theme["cursor pointer"])
-		pygame_sdl2.mouse.set_visible(False)
-	def update(self):
-		self.pos = Engine.mousepos
-		Element.Sprite.update(self)
+def Get(fname):
+	with open(fname) as f:
+		return eval(f.read())
