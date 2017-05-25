@@ -159,20 +159,21 @@ for fn in files:
 	# Skip non-source files.
 	if fn.endswith(".py"):
 		# Open the source file and split it into lines for iteration.
-		for line in open(os.path.join(Paths.lib, fn)).read().splitlines():
-			# Remove irrelevant whitespace.
-			line = line.strip()
-			if line.startswith("import"):
-				# Remove "import" and whitespace. Split by ",".
-				for mod in " ".join(line.split()[1:]).split(","):
-					# Get the actual module imported by "as" imports.
-					if " as " in mod:
-						mod = mod.split(" as ")[0]
-					mod = mod.replace(" ", "")
-					# Get base module (FindModule can't find submodules)
-					if not FindModule(mod.split(".")[0]):
-						alert("The required module '" + mod + "' could not be found.")
-						sys.exit(1)
+		with open(os.path.join(Paths.lib, fn)) as f:
+			for line in f.read().splitlines():
+				# Remove irrelevant whitespace.
+				line = line.strip()
+				if line.startswith("import "):
+					# Remove "import" and whitespace. Split by ",".
+					for mod in " ".join(line.split()[1:]).split(","):
+						# Get the actual module imported by "as" imports.
+						if " as " in mod:
+							mod = mod.split(" as ")[0]
+						mod = mod.replace(" ", "")
+						# Get base module (FindModule can't find submodules)
+						if not FindModule(mod.split(".")[0]):
+							alert("The required module '" + mod + "' could not be found.")
+							sys.exit(1)
 
 # It's finally time to start the game.
 

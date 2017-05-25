@@ -5,6 +5,12 @@ Currently, there is not much to see. The first level consists of an
 endless teal void with a mouse cursor floating around in it. I had to
 start *somewhere*.
 
+## Dependencies
+
+* Python 2
+* pygame_sdl2
+* PIL
+
 ## Links
 
 [RogueAI42 repo](https://github.com/RogueAI42/histacom-au)

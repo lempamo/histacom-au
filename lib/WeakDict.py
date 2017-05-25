@@ -14,14 +14,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Histacom.AU.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Cursor.py - do I have to spell it out?
+# WeakDict.py - a dict that initialises non-existent keys to a default
+# value when you try to access them, rather than raising KeyError.
 
-import Engine, Element, pygame_sdl2
+def WeakDict(default):
+	class WD(dict):
+		def __getitem__(self, key):
+			return dict.setdefault(self, key, default)
+	return WD
 
-class Cursor(Element.Sprite):
-	def __init__(self, win):
-		Element.Sprite.__init__(self, win, 0, 0, Engine.theme["cursor pointer"])
-		pygame_sdl2.mouse.set_visible(False)
-	def update(self):
-		self.pos = Engine.mousepos
-		Element.Sprite.update(self)

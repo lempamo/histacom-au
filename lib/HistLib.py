@@ -27,18 +27,37 @@ class UnsupportedException(Exception):
 # Store two- and four-byte unsigned integers in binary files.
 shortstruct = struct.Struct("<H")
 longstruct = struct.Struct("<L")
+signedshortstruct = struct.Struct("<h")
 
 # Fix struct.unpack's ugly syntax.
-def reader(structobj):
+def Reader(structobj):
 	return lambda x: structobj.unpack(x)[0]
 
-readers = {1: ord, 2: reader(shortstruct), 4: reader(longstruct)}
+readers = {(1, False): ord,
+		(2, False): Reader(shortstruct),
+		(2, True): Reader(signedshortstruct),
+		(4, False): Reader(longstruct)}
 
-def ReadBytes(fobj, num):
-	if num in readers:
-		return readers[num](fobj.read(num))
+# Read an integer num bytes wide from fobj.
+def ReadBytes(fobj, num, signed = False):
+	if (num, signed) in readers:
+		return readers[(num, signed)](fobj.read(num))
 	else:
 		raise TypeError
+
+# Get bit i of num as a bool.
+def GetBit(num, i):
+	mask = 0b10000000 >> i
+	masked = num & mask
+	bit = masked >> (7 - i)
+	return bool(bit)
+
+# Set bit i of num to truthiness of val. Returns the new num.
+def SetBit(num, i, val):
+	if GetBit(num, i) == bool(val):
+		return num
+	else:
+		return num ^ (1 << (7 - i))
 
 # Generator to split an iterable into chunks of equal size.
 def Chunks(l, n):
@@ -51,6 +70,9 @@ def ReadCString(myFile):
 	while True:
 		byte = myFile.read(1)
 		if byte == "\0":
+			return myString
+		elif byte == "":
+			print("warning: reached EOF with no terminator while reading C String")
 			return myString
 		myString += byte
 
